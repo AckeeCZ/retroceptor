@@ -25,7 +25,7 @@ internal class BodyCallExecuteInterceptor : CallFactoryInterceptor {
 internal class ResponseCallExecuteInterceptor : CallFactoryInterceptor {
 
     override fun intercept(chain: CallChain): Deferred<*> {
-        return CoroutineScope(Dispatchers.IO).async(start = CoroutineStart.LAZY) {
+        return CoroutineScope(Dispatchers.Unconfined).async(start = CoroutineStart.LAZY) {
             chain.call.execute()
         }
     }
