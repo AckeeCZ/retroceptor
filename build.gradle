@@ -6,7 +6,9 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.2'
+        classpath "com.android.tools.build:gradle:3.3.2"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3"
+        classpath "com.github.dcendents:android-maven-gradle-plugin:2.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -26,7 +28,24 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.0-alpha'
 }
 
+/**
+ * Define properties with library info
+ */
+ext.libProperties = new Properties()
+ext.libProperties.load(file("${rootDir}/lib.properties").newReader())
+
+ext {
+    bintrayName = 'anko-constraint-layout'
+    publishedArtifactId = 'anko-constraint-layout'
+
+    libraryName = 'Anko Constraint Layout'
+    libraryDescription = 'DSL implementation of constraint layout for anko'
+}
+
 //plugin doesn't understand well with kotlin documentation so disable javadoc generation
 subprojects {
     tasks.withType(Javadoc).all { enabled = false }
 }
+
+apply from: rootProject.file('gradle/bintray/install.gradle')
+apply from: rootProject.file('gradle/bintray/bintray.gradle')
