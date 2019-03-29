@@ -34,9 +34,9 @@ class AckroutineCallAdapterFactory(vararg interceptor: CallFactoryInterceptor) :
                 throw IllegalStateException("Response must be parameterized as Response<Foo> or Response<out Foo>")
             }
 
-            ResponseCallExecuteInterceptor<Any>()
+            ResponseCallExecuteInterceptor()
         } else {
-            BodyCallExecuteInterceptor<Any>()
+            BodyCallExecuteInterceptor()
         }
 
         return AckroutineCallAdapter<Any>(responseType, interceptors + callInterceptor)

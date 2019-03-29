@@ -20,8 +20,6 @@ class AckroutineCallAdapter<T>(
     @Suppress("UNCHECKED_CAST")
     override fun adapt(call: Call<T>): Deferred<T> {
         val chain = CallChainImpl(0, call, interceptors)
-        val deferred = chain.proceed(call)
-
-        return deferred as Deferred<T>
+        return chain.proceed(call) as Deferred<T>
     }
 }

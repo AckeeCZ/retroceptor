@@ -14,10 +14,6 @@ buildscript {
 apply plugin: 'java-library'
 apply plugin: 'org.jetbrains.kotlin.jvm'
 
-allprojects {
-
-}
-
 repositories {
     google()
     jcenter()
