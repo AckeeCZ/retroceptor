@@ -6,11 +6,16 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import cz.ackee.sample.model.SampleItem
+import kotlinx.coroutines.*
 
 /**
  * Activity with some detail
  */
 class DetailActivity : ListActivity(), IDetailView {
+
+    val job = Job()
+
+    val coroutineContext = Dispatchers.Main + job
 
     private var presenter: DetailPresenter? = null
 
@@ -20,8 +25,18 @@ class DetailActivity : ListActivity(), IDetailView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        presenter = DetailPresenter()
+        presenter = DetailPresenter(coroutineContext)
         presenter!!.refresh()
+//        GlobalScope.launch(Dispatchers.Main) {
+//            try {
+//                val data = withContext(Dispatchers.IO) {
+//                    presenter.apiInteractor.getData().await()
+//                }
+//                onDataLoaded(data)
+//            } catch (e: Exception) {
+//                onErrorHappened(e)
+//            }
+//        }
     }
 
     override fun onResume() {
@@ -32,6 +47,11 @@ class DetailActivity : ListActivity(), IDetailView {
     override fun onPause() {
         super.onPause()
         presenter!!.onViewDetached()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.complete()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

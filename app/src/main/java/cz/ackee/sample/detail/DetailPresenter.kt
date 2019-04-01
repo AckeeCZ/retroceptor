@@ -1,13 +1,18 @@
 package cz.ackee.sample.detail
 
+import android.util.Log
 import cz.ackee.ackroutine.core.DefaultOAuthCredentials
 import cz.ackee.sample.App
 import cz.ackee.sample.model.SampleItem
+import kotlinx.coroutines.*
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Presenter for detail screen
  */
-class DetailPresenter {
+class DetailPresenter(override val coroutineContext: CoroutineContext) : CoroutineScope {
+
+
 
     private val apiInteractor = App.diContainer.apiInteractor
     private var view: IDetailView? = null
@@ -25,7 +30,16 @@ class DetailPresenter {
     }
 
     fun refresh() {
-        // TODO: perform data fetch action
+//        launch {
+//            try {
+//                val data = withContext(Dispatchers.IO) {
+//                    apiInteractor.getData().await()
+//                }
+//                onDataLoaded(data)
+//            } catch (e: Exception) {
+//                onErrorHappened(e)
+//            }
+//        }
     }
 
     private fun onErrorHappened(throwable: Throwable) {
@@ -46,6 +60,15 @@ class DetailPresenter {
     }
 
     fun logout() {
-        // TODO: perform logout action
+        GlobalScope.launch(Dispatchers.Default) {
+            try {
+                withContext(Dispatchers.IO) {
+                    apiInteractor.logout().await()
+                }
+                App.diContainer.logouter.logout()
+            } catch (e: Exception) {
+                onErrorHappened(e)
+            }
+        }
     }
 }

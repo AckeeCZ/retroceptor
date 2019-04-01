@@ -1,6 +1,8 @@
 package cz.ackee.sample.di
 
+import com.squareup.moshi.Moshi
 import cz.ackee.ackroutine.CoroutineOAuthManager
+import cz.ackee.ackroutine.OAuthCallInterceptor
 import cz.ackee.retrofitadapter.AckroutineCallAdapterFactory
 import cz.ackee.sample.App
 import cz.ackee.sample.interactor.ApiInteractorImpl
@@ -18,17 +20,13 @@ import retrofit2.converter.moshi.MoshiConverterFactory
  */
 class DIContainer(val app: App) {
 
-//    val rxOAuthManager = RxOAuthManager(
-//            context = app,
-//            refreshTokenAction = { authApiDescription.refreshAccessToken(it).map { it } },
-//            onRefreshTokenFailed = { logouter.logout() }
-//    )
-
     val oAuthManager = CoroutineOAuthManager(
         context = app,
         refreshTokenAction = { authApiDescription.refreshAccessToken(it) },
         onRefreshTokenFailed = { logouter.logout() }
     )
+
+    val callAdapterFactory: AckroutineCallAdapterFactory = AckroutineCallAdapterFactory(OAuthCallInterceptor(oAuthManager))
 
     val logouter = Logouter(app)
 
@@ -38,15 +36,16 @@ class DIContainer(val app: App) {
             .addConverterFactory(MoshiConverterFactory.create())
 
     val authApiDescription = retrofitBuilder
-        .addCallAdapterFactory(AckroutineCallAdapterFactory())
+        .addCallAdapterFactory(callAdapterFactory)
         .build()
         .create(AuthApiDescription::class.java)
 
     val apiDescription: ApiDescription = retrofitBuilder
-        .client(OkHttpClient.Builder()
-            //.addNetworkInterceptor(rxOAuthManager.provideAuthInterceptor())
+        .client(
+            OkHttpClient.Builder()
+            .addNetworkInterceptor(oAuthManager.provideAuthInterceptor())
             .build())
-        .addCallAdapterFactory(AckroutineCallAdapterFactory())
+        .addCallAdapterFactory(callAdapterFactory)
         .build()
         .create(ApiDescription::class.java)
 
