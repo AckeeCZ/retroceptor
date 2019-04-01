@@ -13,19 +13,16 @@ buildscript {
     }
 }
 
-apply plugin: 'java-library'
-apply plugin: 'org.jetbrains.kotlin.jvm'
-
-repositories {
-    google()
-    jcenter()
-    maven { url "https://jitpack.io" }
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
 }
 
-dependencies {
-    implementation "com.squareup.retrofit2:retrofit:2.5.0"
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.3.21'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.0-alpha'
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
 
 /**
@@ -35,17 +32,12 @@ ext.libProperties = new Properties()
 ext.libProperties.load(file("${rootDir}/lib.properties").newReader())
 
 ext {
-    bintrayName = 'anko-constraint-layout'
-    publishedArtifactId = 'anko-constraint-layout'
-
-    libraryName = 'Anko Constraint Layout'
-    libraryDescription = 'DSL implementation of constraint layout for anko'
+    appcompatVersion = '1.0.0'
+    retrofitVersion = '2.5.0'
+    coroutinesVersion = '1.2.0-alpha'
 }
 
 //plugin doesn't understand well with kotlin documentation so disable javadoc generation
 subprojects {
     tasks.withType(Javadoc).all { enabled = false }
 }
-
-apply from: rootProject.file('gradle/bintray/install.gradle')
-apply from: rootProject.file('gradle/bintray/bintray.gradle')
