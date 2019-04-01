@@ -3,7 +3,7 @@ package cz.ackee.ackroutine
 import android.content.Context
 import android.content.SharedPreferences
 import cz.ackee.ackroutine.core.*
-import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.*
 
 /**
  * TODO: to be continued...
@@ -36,4 +36,33 @@ class CoroutineOAuthManager internal constructor(
     }
 
     fun provideAuthInterceptor() = OAuthInterceptor(oAuthStore)
+
+    fun <T> wrapDeferred(originalCall: Deferred<T>): Deferred<T> {
+        return CoroutineScope(Dispatchers.Unconfined).async(start = CoroutineStart.LAZY) {
+
+            if (oAuthStore.tokenExpired()) {
+                refreshAccessToken()
+                //originalCall.await()
+            } else {
+
+            }
+
+            originalCall.await()
+        }
+    }
+
+    private suspend fun refreshAccessToken() {
+        try {
+            val credentials = refreshTokenAction(oAuthStore.refreshToken ?: "").await()
+            saveCredentials(credentials)
+
+        } catch (e: Exception) {
+            if (errorChecker.invalidAccessToken(e)) {
+                clearCredentials()
+                onRefreshTokenFailed(e)
+            }
+        }
+    }
 }
+
+fun <T> Deferred<T>.wrapWithAcessTokenCheck(oAuthManager: CoroutineOAuthManager) = oAuthManager.wrapDeferred(this)

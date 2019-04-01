@@ -1,10 +1,8 @@
 package cz.ackee.sample.login
 
+import android.util.Log
 import cz.ackee.sample.App
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
 /**
  * Presenter for login screen
@@ -15,11 +13,13 @@ class LoginPresenter {
     private var view: ILoginView? = null
 
     fun login(name: String, password: String) {
-        GlobalScope.launch {
+        CoroutineScope(Dispatchers.Main).launch {
             try {
-                withContext(Dispatchers.IO) {
+                val result = withContext(Dispatchers.IO) {
                     apiInteractor.login(name, password).await()
                 }
+
+                Log.d("LOGIN", "Received ${result.accessToken}")
                 onLoggedIn()
             } catch (e: Exception) {
                 onErrorHappened(e)

@@ -1,6 +1,7 @@
 package cz.ackee.sample
 
 import android.app.Application
+import com.facebook.stetho.Stetho
 import cz.ackee.sample.di.DIContainer
 import cz.ackee.sample.model.rest.Server
 
