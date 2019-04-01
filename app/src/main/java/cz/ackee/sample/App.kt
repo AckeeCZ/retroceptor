@@ -17,6 +17,6 @@ class App : Application() {
         super.onCreate()
         Server(this)
         diContainer = DIContainer(this)
-        //Stetho.initializeWithDefaults(this)
+        Stetho.initializeWithDefaults(this)
     }
 }
