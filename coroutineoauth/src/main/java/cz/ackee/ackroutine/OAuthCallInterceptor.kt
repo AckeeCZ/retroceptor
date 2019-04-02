@@ -11,14 +11,13 @@ import kotlinx.coroutines.Deferred
 class OAuthCallInterceptor(private val oAuthManager: CoroutineOAuthManager) : CallFactoryInterceptor {
 
     override fun intercept(chain: CallChain): Deferred<*> {
-        val deferred = chain.proceed(chain.call)
-
         return if (chain.annotations.any { it is IgnoreAuth }) {
-            Log.d("CALL", "No wrap token")
-            deferred
+            Log.d("OAuth Interceptor", "Proceed without wrap")
+            chain.proceed(chain.call)
         } else {
-            Log.d("CALL", "With wrap token")
-            deferred.wrapWithAcessTokenCheck(oAuthManager)
+            Log.d("OAuth Interceptor", "Proceed with wrap")
+
+            oAuthManager.wrapDeferred { chain.proceed(if (with(chain.call) { isExecuted || isCanceled }) chain.call.clone() else chain.call) }
         }
     }
 }

@@ -2,12 +2,19 @@ package cz.ackee.ackroutine
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import cz.ackee.ackroutine.core.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 
 /**
  * TODO: to be continued...
  */
+
+typealias DeferredCallFactory<T> = () -> Deferred<T>
+
 class CoroutineOAuthManager internal constructor(
     private val oAuthStore: OAuthStore,
     private val refreshTokenAction: (String) -> Deferred<OAuthCredentials>,
@@ -37,32 +44,50 @@ class CoroutineOAuthManager internal constructor(
 
     fun provideAuthInterceptor() = OAuthInterceptor(oAuthStore)
 
-    fun <T> wrapDeferred(originalCall: Deferred<T>): Deferred<T> {
-        return CoroutineScope(Dispatchers.Unconfined).async(start = CoroutineStart.LAZY) {
-
+    fun <T> wrapDeferred(callFactory: DeferredCallFactory<T>): Deferred<T> {
+        return GlobalScope.async(start = CoroutineStart.LAZY) {
+            Log.d("Manager", "Enter")
             if (oAuthStore.tokenExpired()) {
-                refreshAccessToken()
-                //originalCall.await()
+                Log.d("Manager", "Expired")
+                saveCredentials(refreshAccessToken())
+
+                //callFactory().await()
+                Log.d("Manager", "Refreshed ?")
+                callFactory().await().also {
+                    Log.d("Manager", "Original call")
+                }
             } else {
-
+                //Log.d("Manager", "Non Expired")
+                try {
+                    Log.d("Manager", "Original call")
+                    callFactory().await()
+                } catch (e: Exception) {
+                    if (errorChecker.invalidAccessToken(e)) {
+                        Log.d("Manager", "Invalid token")
+                        saveCredentials(refreshAccessToken())
+                        Log.d("Manager", "Refreshed ? 2")
+                        callFactory().await().also {
+                            Log.d("Manager", "Original call 2")
+                        }
+                    } else {
+                        Log.d("Manager", "Throw error")
+                        throw e
+                    }
+                }
             }
-
-            originalCall.await()
         }
     }
 
-    private suspend fun refreshAccessToken() {
-        try {
-            val credentials = refreshTokenAction(oAuthStore.refreshToken ?: "").await()
-            saveCredentials(credentials)
-
+    private suspend fun refreshAccessToken(): OAuthCredentials {
+        return try {
+            refreshTokenAction(oAuthStore.refreshToken ?: "").await()
         } catch (e: Exception) {
-            if (errorChecker.invalidAccessToken(e)) {
+            if (errorChecker.invalidRefreshToken(e)) {
                 clearCredentials()
                 onRefreshTokenFailed(e)
             }
+
+            throw e
         }
     }
 }
-
-fun <T> Deferred<T>.wrapWithAcessTokenCheck(oAuthManager: CoroutineOAuthManager) = oAuthManager.wrapDeferred(this)

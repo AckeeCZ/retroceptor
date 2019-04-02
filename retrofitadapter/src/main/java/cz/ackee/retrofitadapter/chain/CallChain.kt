@@ -35,3 +35,19 @@ class CallChainImpl(
         return interceptors[chainIndex].intercept(newChain)
     }
 }
+
+//data class CallChainExp(
+//    private val chainIndex: Int,
+//    private val actualCall: Call<*>,
+//    private val annotationArray: Array<out Annotation>,
+//    private val interceptors: List<CallFactoryInterceptor>
+//) {
+//    fun proceed(call: Call<*>): Deferred<*> {
+//        if (chainIndex + 1 > interceptors.size) {
+//            throw IllegalStateException("chainIndex ${chainIndex + 1} does not match with actual interceptor size ${interceptors.size}")
+//        }
+//
+//        val newChain = CallChainE(chainIndex + 1, call, annotationArray, interceptors)
+//        return interceptors[chainIndex].intercept(newChain)
+//    }
+//}

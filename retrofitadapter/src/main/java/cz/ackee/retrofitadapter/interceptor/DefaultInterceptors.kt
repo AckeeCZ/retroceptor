@@ -12,7 +12,7 @@ import retrofit2.HttpException
 internal class BodyCallExecuteInterceptor : CallFactoryInterceptor {
 
     override fun intercept(chain: CallChain): Deferred<*> {
-        return CoroutineScope(Dispatchers.Unconfined).async(start = CoroutineStart.LAZY) {
+        return GlobalScope.async(start = CoroutineStart.LAZY) {
             val response = chain.call.execute()
             if (response.isSuccessful) {
                 response.body()!!
@@ -26,7 +26,7 @@ internal class BodyCallExecuteInterceptor : CallFactoryInterceptor {
 internal class ResponseCallExecuteInterceptor : CallFactoryInterceptor {
 
     override fun intercept(chain: CallChain): Deferred<*> {
-        return CoroutineScope(Dispatchers.Default).async(start = CoroutineStart.LAZY) {
+        return GlobalScope.async(start = CoroutineStart.LAZY) {
             chain.call.execute()
         }
     }

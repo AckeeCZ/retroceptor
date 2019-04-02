@@ -40,15 +40,6 @@ class AckroutineCallAdapterFactory(vararg interceptor: CallFactoryInterceptor) :
             BodyCallExecuteInterceptor()
         }
 
-        val my = CompletableDeferred(1)
-
-
-
-
-
-
-
-
         return AckroutineCallAdapter<Any>(responseType, annotations,interceptors + callInterceptor)
     }
 }
