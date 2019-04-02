@@ -12,8 +12,6 @@ import kotlin.coroutines.CoroutineContext
  */
 class DetailPresenter(override val coroutineContext: CoroutineContext) : CoroutineScope {
 
-
-
     private val apiInteractor = App.diContainer.apiInteractor
     private var view: IDetailView? = null
     private var items: List<SampleItem>? = null
@@ -30,16 +28,22 @@ class DetailPresenter(override val coroutineContext: CoroutineContext) : Corouti
     }
 
     fun refresh() {
-//        launch {
-//            try {
-//                val data = withContext(Dispatchers.IO) {
-//                    apiInteractor.getData().await()
-//                }
-//                onDataLoaded(data)
-//            } catch (e: Exception) {
-//                onErrorHappened(e)
-//            }
-//        }
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val data = withContext(Dispatchers.IO) {
+                    Log.d("Detail", "Refresh")
+                    val deferred = apiInteractor.getData()
+                    Log.d("Detail", "Before await")
+                    val res = deferred.await()
+                    Log.d("Detail", "After await")
+                    return@withContext res
+
+                }
+                onDataLoaded(data)
+            } catch (e: Exception) {
+                onErrorHappened(e)
+            }
+        }
     }
 
     private fun onErrorHappened(throwable: Throwable) {
