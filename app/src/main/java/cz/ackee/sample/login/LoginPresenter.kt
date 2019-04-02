@@ -15,6 +15,7 @@ class LoginPresenter {
     private var view: ILoginView? = null
 
     fun login(name: String, password: String) {
+        // for demo purposes only, ideally use scope of a viewModel
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 withContext(Dispatchers.IO) {

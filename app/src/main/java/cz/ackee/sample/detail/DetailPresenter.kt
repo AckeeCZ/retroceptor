@@ -1,10 +1,12 @@
 package cz.ackee.sample.detail
 
-import android.util.Log
 import cz.ackee.ackroutine.core.DefaultOAuthCredentials
 import cz.ackee.sample.App
 import cz.ackee.sample.model.SampleItem
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -28,16 +30,11 @@ class DetailPresenter(override val coroutineContext: CoroutineContext) : Corouti
     }
 
     fun refresh() {
+        // for demo purposes only, ideally use scope of a viewModel
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 val data = withContext(Dispatchers.IO) {
-                    Log.d("Detail", "Refresh")
-                    val deferred = apiInteractor.getData()
-                    Log.d("Detail", "Before await")
-                    val res = deferred.await()
-                    Log.d("Detail", "After await")
-                    return@withContext res
-
+                    apiInteractor.getData().await()
                 }
                 onDataLoaded(data)
             } catch (e: Exception) {
@@ -64,7 +61,8 @@ class DetailPresenter(override val coroutineContext: CoroutineContext) : Corouti
     }
 
     fun logout() {
-        GlobalScope.launch(Dispatchers.Default) {
+        // for demo purposes only, ideally use scope of a viewModel
+        CoroutineScope(Dispatchers.Main).launch {
             try {
                 withContext(Dispatchers.IO) {
                     apiInteractor.logout().await()
