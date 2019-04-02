@@ -1,10 +1,6 @@
 package cz.ackee.sample.login
 
 import cz.ackee.sample.App
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Presenter for login screen
@@ -15,16 +11,7 @@ class LoginPresenter {
     private var view: ILoginView? = null
 
     fun login(name: String, password: String) {
-        GlobalScope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    apiInteractor.login(name, password).await()
-                }
-                onLoggedIn()
-            } catch (e: Exception) {
-                onErrorHappened(e)
-            }
-        }
+        // TODO: perform login action
     }
 
     fun onViewAttached(view: ILoginView) {

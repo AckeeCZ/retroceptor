@@ -3,10 +3,6 @@ package cz.ackee.sample.detail
 import cz.ackee.ackroutine.core.DefaultOAuthCredentials
 import cz.ackee.sample.App
 import cz.ackee.sample.model.SampleItem
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Presenter for detail screen
@@ -29,16 +25,7 @@ class DetailPresenter {
     }
 
     fun refresh() {
-        GlobalScope.launch {
-            try {
-                val data = withContext(Dispatchers.IO) {
-                    apiInteractor.getData().await()
-                }
-                onDataLoaded(data)
-            } catch (e: Exception) {
-                onErrorHappened(e)
-            }
-        }
+        // TODO: perform data fetch action
     }
 
     private fun onErrorHappened(throwable: Throwable) {
@@ -59,15 +46,6 @@ class DetailPresenter {
     }
 
     fun logout() {
-        GlobalScope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    apiInteractor.logout().await()
-                }
-                App.diContainer.logouter.logout()
-            } catch (e: Exception) {
-                onErrorHappened(e)
-            }
-        }
+        // TODO: perform logout action
     }
 }
