@@ -2,16 +2,15 @@ package cz.ackee.sample.interactor
 
 import cz.ackee.ackroutine.core.OAuthCredentials
 import cz.ackee.sample.model.SampleItem
-import kotlinx.coroutines.Deferred
 
 /**
  * Interactor for communicating with API
  */
 interface ApiInteractor {
 
-    fun getData(): Deferred<List<SampleItem>>
+    suspend fun getData(): List<SampleItem>
 
-    fun login(name: String, password: String): Deferred<OAuthCredentials>
+    suspend fun login(name: String, password: String): OAuthCredentials
 
-    fun logout(): Deferred<Unit>
+    suspend fun logout()
 }

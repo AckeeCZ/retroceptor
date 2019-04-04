@@ -5,10 +5,6 @@ import cz.ackee.ackroutine.core.OAuthCredentials
 import cz.ackee.sample.model.SampleItem
 import cz.ackee.sample.model.rest.ApiDescription
 import cz.ackee.sample.model.rest.AuthApiDescription
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 
 /**
  * Implementation of api
@@ -19,15 +15,17 @@ class ApiInteractorImpl(
     private val authApiDescription: AuthApiDescription
 ) : ApiInteractor {
 
-    override fun login(name: String, password: String): Deferred<OAuthCredentials> {
-        return GlobalScope.async(start = CoroutineStart.LAZY) {
-            (authApiDescription.login(name, password).await()).also {
-                oAuthManager.saveCredentials(it)
-            }
+    override suspend fun getData(): List<SampleItem> {
+        return apiDescription.getData().await()
+    }
+
+    override suspend fun login(name: String, password: String): OAuthCredentials {
+        return authApiDescription.login(name, password).await().also {
+            oAuthManager.saveCredentials(it)
         }
     }
 
-    override fun getData(): Deferred<List<SampleItem>> = apiDescription.getData()
-
-    override fun logout(): Deferred<Unit> = authApiDescription.logout()
+    override suspend fun logout() {
+        authApiDescription.logout().await()
+    }
 }

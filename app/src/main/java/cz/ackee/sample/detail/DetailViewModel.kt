@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 /**
- * TODO add class description
+ * ViewModel for detail screen.
  */
 class DetailViewModel(
     private val api: ApiInteractor,
@@ -40,7 +40,7 @@ class DetailViewModel(
     fun fetchData() {
         launch {
             try {
-                viewStateChannel.send(State.Loaded(api.getData().await()))
+                viewStateChannel.send(State.Loaded(api.getData()))
             } catch (e: Exception) {
                 viewStateChannel.send(State.Error(e))
             }
@@ -57,7 +57,7 @@ class DetailViewModel(
 
     fun logout() {
         launch {
-            api.logout().await()
+            api.logout()
             logouter.logout()
         }
     }

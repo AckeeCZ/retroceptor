@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 /**
- * TODO add class description
+ * ViewModel for login screen.
  */
 class LoginViewModel(private val api: ApiInteractor) : ViewModel(), CoroutineScope {
 
@@ -29,7 +29,7 @@ class LoginViewModel(private val api: ApiInteractor) : ViewModel(), CoroutineSco
         launch {
             viewStateChannel.send(
                 try {
-                    State.Loaded(api.login(name, password).await().let { Unit })
+                    State.Loaded(api.login(name, password).let { Unit })
                 } catch (e: Exception) {
                     State.Error(e)
                 }
