@@ -39,6 +39,6 @@ class AckroutineCallAdapterFactory(vararg interceptor: CallFactoryInterceptor) :
             BodyCallExecuteInterceptor()
         }
 
-        return AckroutineCallAdapter<Any>(responseType, interceptors + callInterceptor)
+        return AckroutineCallAdapter<Any>(responseType, annotations, interceptors + callInterceptor)
     }
 }

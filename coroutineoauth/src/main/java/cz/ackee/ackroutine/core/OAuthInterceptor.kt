@@ -17,6 +17,7 @@ class OAuthInterceptor internal constructor(private val oAuthStore: OAuthStore) 
             val accToken = oAuthStore.accessToken
             builder.addHeader("Authorization", "Bearer $accToken")
         }
+
         return chain.proceed(builder.build())
     }
 }

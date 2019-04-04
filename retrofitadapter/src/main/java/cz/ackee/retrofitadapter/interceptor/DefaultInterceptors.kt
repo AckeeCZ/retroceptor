@@ -1,5 +1,6 @@
 package cz.ackee.retrofitadapter.interceptor
 
+import android.util.Log
 import cz.ackee.retrofitadapter.chain.CallChain
 import kotlinx.coroutines.*
 import retrofit2.HttpException
@@ -11,10 +12,10 @@ import retrofit2.HttpException
 internal class BodyCallExecuteInterceptor : CallFactoryInterceptor {
 
     override fun intercept(chain: CallChain): Deferred<*> {
-        return CoroutineScope(Dispatchers.Unconfined).async(start = CoroutineStart.LAZY) {
+        return GlobalScope.async(start = CoroutineStart.LAZY) {
             val response = chain.call.execute()
             if (response.isSuccessful) {
-                response
+                response.body()!!
             } else {
                 throw HttpException(response)
             }
@@ -25,7 +26,7 @@ internal class BodyCallExecuteInterceptor : CallFactoryInterceptor {
 internal class ResponseCallExecuteInterceptor : CallFactoryInterceptor {
 
     override fun intercept(chain: CallChain): Deferred<*> {
-        return CoroutineScope(Dispatchers.Unconfined).async(start = CoroutineStart.LAZY) {
+        return GlobalScope.async(start = CoroutineStart.LAZY) {
             chain.call.execute()
         }
     }

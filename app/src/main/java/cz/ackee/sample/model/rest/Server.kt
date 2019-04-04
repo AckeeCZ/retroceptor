@@ -1,6 +1,7 @@
 package cz.ackee.sample.model.rest
 
 import android.content.Context
+import android.util.Log
 import io.appflate.restmock.MockAnswer
 import io.appflate.restmock.RESTMockServer
 import io.appflate.restmock.RESTMockServerStarter
@@ -73,6 +74,7 @@ class Server(val context: Context) {
         RESTMockServer.whenPOST(RequestMatchers.pathContains("login")).delay(TimeUnit.MILLISECONDS, 500).thenAnswer(MockAnswer {
             // accepts any login/password
             accessToken = UUID.randomUUID().toString()
+            Log.d("SERVER", "Generated access token: $accessToken")
             refreshToken = UUID.randomUUID().toString()
             tokenExpiration = System.currentTimeMillis() + EXPIRES_IN * 1000
             MockResponse()
