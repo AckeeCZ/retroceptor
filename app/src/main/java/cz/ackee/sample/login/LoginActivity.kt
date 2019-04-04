@@ -57,4 +57,9 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
     private fun showError(throwable: Throwable) {
         throwable.printStackTrace()
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.complete()
+    }
 }

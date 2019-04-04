@@ -45,11 +45,6 @@ class DetailActivity : ListActivity(), CoroutineScope {
         listAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, items)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        job.complete()
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menu.add("Refresh")
             .setOnMenuItemClickListener {
@@ -79,6 +74,11 @@ class DetailActivity : ListActivity(), CoroutineScope {
             }
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
         return super.onCreateOptionsMenu(menu)
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        job.complete()
     }
 }
 

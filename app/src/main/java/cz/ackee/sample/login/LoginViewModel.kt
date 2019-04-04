@@ -36,4 +36,9 @@ class LoginViewModel(private val api: ApiInteractor) : ViewModel(), CoroutineSco
             )
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        job.complete()
+    }
 }
