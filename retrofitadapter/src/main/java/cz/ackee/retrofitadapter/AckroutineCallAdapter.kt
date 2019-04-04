@@ -1,7 +1,7 @@
-package cz.ackee.ackroutine
+package cz.ackee.retrofitadapter
 
-import cz.ackee.ackroutine.chain.CallChainImpl
-import cz.ackee.ackroutine.interceptor.CallFactoryInterceptor
+import cz.ackee.retrofitadapter.chain.CallChainImpl
+import cz.ackee.retrofitadapter.interceptor.CallFactoryInterceptor
 import kotlinx.coroutines.Deferred
 import retrofit2.Call
 import retrofit2.CallAdapter

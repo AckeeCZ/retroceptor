@@ -1,6 +1,6 @@
-package cz.ackee.ackroutine.interceptor
+package cz.ackee.retrofitadapter.interceptor
 
-import cz.ackee.ackroutine.chain.CallChain
+import cz.ackee.retrofitadapter.chain.CallChain
 import kotlinx.coroutines.*
 import retrofit2.HttpException
 
