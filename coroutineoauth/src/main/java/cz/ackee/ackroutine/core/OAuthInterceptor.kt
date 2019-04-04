@@ -1,7 +1,6 @@
 package cz.ackee.ackroutine.core
 
 import android.text.TextUtils
-import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.Response
 
@@ -16,11 +15,9 @@ class OAuthInterceptor internal constructor(private val oAuthStore: OAuthStore) 
 
         if (!TextUtils.isEmpty(oAuthStore.accessToken)) {
             val accToken = oAuthStore.accessToken
-            Log.d("OKHTTP", "Setting token header $accToken")
             builder.addHeader("Authorization", "Bearer $accToken")
-        } else {
-            Log.d("OKHTTP", "No access token")
         }
+
         return chain.proceed(builder.build())
     }
 }

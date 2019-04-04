@@ -75,7 +75,7 @@ class DetailActivity : ListActivity(), CoroutineScope {
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
         return super.onCreateOptionsMenu(menu)
     }
-    
+
     override fun onDestroy() {
         super.onDestroy()
         job.complete()
