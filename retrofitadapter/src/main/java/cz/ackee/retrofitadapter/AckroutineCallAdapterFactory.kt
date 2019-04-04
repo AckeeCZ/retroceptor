@@ -3,7 +3,6 @@ package cz.ackee.retrofitadapter
 import cz.ackee.retrofitadapter.interceptor.BodyCallExecuteInterceptor
 import cz.ackee.retrofitadapter.interceptor.CallFactoryInterceptor
 import cz.ackee.retrofitadapter.interceptor.ResponseCallExecuteInterceptor
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import retrofit2.CallAdapter
 import retrofit2.Response
@@ -40,6 +39,6 @@ class AckroutineCallAdapterFactory(vararg interceptor: CallFactoryInterceptor) :
             BodyCallExecuteInterceptor()
         }
 
-        return AckroutineCallAdapter<Any>(responseType, annotations,interceptors + callInterceptor)
+        return AckroutineCallAdapter<Any>(responseType, annotations, interceptors + callInterceptor)
     }
 }
