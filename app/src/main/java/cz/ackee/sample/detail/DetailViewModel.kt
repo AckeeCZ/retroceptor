@@ -1,0 +1,69 @@
+package cz.ackee.sample.detail
+
+import androidx.lifecycle.ViewModel
+import cz.ackee.ackroutine.CoroutineOAuthManager
+import cz.ackee.ackroutine.core.DefaultOAuthCredentials
+import cz.ackee.sample.interactor.ApiInteractor
+import cz.ackee.sample.model.Logouter
+import cz.ackee.sample.model.SampleItem
+import cz.ackee.sample.model.State
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
+
+/**
+ * TODO add class description
+ */
+class DetailViewModel(
+    private val api: ApiInteractor,
+    private val oAuthManager: CoroutineOAuthManager,
+    private val logouter: Logouter
+) : ViewModel(), CoroutineScope {
+
+    private val viewStateChannel = Channel<State<List<SampleItem>>>()
+    private val job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + job
+
+    val viewState: ReceiveChannel<State<List<SampleItem>>>
+        get() = viewStateChannel
+
+    init {
+        fetchData()
+    }
+
+    fun fetchData() {
+        launch {
+            try {
+                viewStateChannel.send(State.Loaded(api.getData().await()))
+            } catch (e: Exception) {
+                viewStateChannel.send(State.Error(e))
+            }
+        }
+    }
+
+    fun invalidateAccessToken() {
+        oAuthManager.saveCredentials(DefaultOAuthCredentials("invalid-access-token", oAuthManager.refreshToken ?: "", 15))
+    }
+
+    fun invalidateRefreshToken() {
+        oAuthManager.saveCredentials(DefaultOAuthCredentials(oAuthManager.accessToken ?: "", "invalid-refresh-token", 15))
+    }
+
+    fun logout() {
+        launch {
+            api.logout().await()
+            logouter.logout()
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        job.complete()
+    }
+}

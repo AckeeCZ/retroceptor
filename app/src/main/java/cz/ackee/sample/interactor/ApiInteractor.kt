@@ -1,6 +1,5 @@
 package cz.ackee.sample.interactor
 
-import cz.ackee.ackroutine.core.DefaultOAuthCredentials
 import cz.ackee.ackroutine.core.OAuthCredentials
 import cz.ackee.sample.model.SampleItem
 import kotlinx.coroutines.Deferred
@@ -8,7 +7,7 @@ import kotlinx.coroutines.Deferred
 /**
  * Interactor for communicating with API
  */
-interface IApiInteractor {
+interface ApiInteractor {
 
     fun getData(): Deferred<List<SampleItem>>
 
