@@ -1,7 +1,5 @@
-package cz.ackee.coroutineoauth
+package cz.ackee.ackroutine
 
-import androidx.test.InstrumentationRegistry.getTargetContext
-import cz.ackee.ackroutine.CoroutineOAuthManager
 import cz.ackee.ackroutine.core.DefaultOAuthCredentials
 import cz.ackee.ackroutine.core.OAuthCredentials
 import cz.ackee.ackroutine.core.OAuthStore
@@ -13,18 +11,13 @@ import okhttp3.ResponseBody
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import retrofit2.HttpException
 import retrofit2.Response
 
 /**
- * Tests for [CoroutineOAuthManager] class
+ * Tests for [CoroutineOAuthManager] class.
  */
-@RunWith(JUnit4::class)
-class CoroutineOAuthManagerTest {
-
-    private var firstRun: Boolean = false
+class OAuthManagerTest {
 
     private val accessToken = "access-token"
     private val refreshToken = "refresh-token"
@@ -35,9 +28,13 @@ class CoroutineOAuthManagerTest {
     private val unauthorizedException = HttpException(Response.error<Any>(401, ResponseBody.create(null, "error body")))
     private val httpException = HttpException(Response.error<Unit>(404, ResponseBody.create(null, "error body")))
 
+    private val store = OAuthStore(MockedSharedPreferences())
+
     private val refreshAction: (String) -> Deferred<OAuthCredentials> = { refresh ->
         if (refresh == refreshToken) CompletableDeferred(credentials) else throw unauthorizedException
     }
+
+    private var firstRun = true
 
     @Before
     fun setup() {
@@ -52,13 +49,13 @@ class CoroutineOAuthManagerTest {
 
     @Test
     fun testSuccessRequest() {
-        val manager = CoroutineOAuthManager(getTargetContext(), refreshAction)
+        val manager = CoroutineOAuthManager(store, refreshAction)
         assertEquals(runBlocking { manager.wrapDeferred { CompletableDeferred(successResult) }.await() }, successResult)
     }
 
     @Test(expected = HttpException::class)
     fun testErrorRequest() {
-        val manager = CoroutineOAuthManager(getTargetContext(), refreshAction)
+        val manager = CoroutineOAuthManager(store, refreshAction)
         runBlocking {
             manager.wrapDeferred {
                 CompletableDeferred<Unit>(null).apply {
@@ -70,13 +67,10 @@ class CoroutineOAuthManagerTest {
 
     @Test
     fun testExpiredAccessTokenCheckLocal() {
-        val store = OAuthStore(getTargetContext()).also {
-            it.saveCredentials(credentials.copy(expiresIn = -1))
-        }
-
+        store.saveCredentials(credentials.copy(expiresIn = -1))
         assertTrue(store.tokenExpired())
 
-        val manager = CoroutineOAuthManager(getTargetContext(), refreshAction)
+        val manager = CoroutineOAuthManager(store, refreshAction)
         runBlocking { manager.wrapDeferred { CompletableDeferred(successResult) }.await() }
 
         assertFalse(store.tokenExpired())
@@ -84,7 +78,7 @@ class CoroutineOAuthManagerTest {
 
     @Test
     fun testExpiredAccessTokenSuccessRefresh() {
-        val manager = CoroutineOAuthManager(getTargetContext(), refreshAction)
+        val manager = CoroutineOAuthManager(store, refreshAction)
 
         val result = runBlocking {
             manager.wrapDeferred {
@@ -102,8 +96,8 @@ class CoroutineOAuthManagerTest {
 
     @Test(expected = HttpException::class)
     fun testExpiredAccessTokenErrorRefresh() {
-        OAuthStore(getTargetContext()).saveCredentials(credentials.copy(expiresIn = -1, refreshToken = refreshToken.reversed()))
-        val manager = CoroutineOAuthManager(getTargetContext(), refreshAction)
+        store.saveCredentials(credentials.copy(expiresIn = -1, refreshToken = refreshToken.reversed()))
+        val manager = CoroutineOAuthManager(store, refreshAction)
 
         runBlocking {
             manager.wrapDeferred { CompletableDeferred(successResult) }.await()
@@ -111,6 +105,6 @@ class CoroutineOAuthManagerTest {
     }
 
     private fun refreshStore() {
-        OAuthStore(getTargetContext()).saveCredentials(credentials)
+        store.saveCredentials(credentials)
     }
 }

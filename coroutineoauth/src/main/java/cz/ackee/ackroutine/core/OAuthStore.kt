@@ -40,12 +40,12 @@ internal class OAuthStore {
 
     fun saveCredentials(credentials: OAuthCredentials) {
         sp.edit()
-                .putString(ACCESS_TOKEN_KEY, credentials.accessToken)
-                .putString(REFRESH_TOKEN_KEY, credentials.refreshToken)
-                .apply {
-                    credentials.expiresIn?.let { expiresIn -> putLong(EXPIRES_AT_KEY, System.currentTimeMillis() + expiresIn * 1000) }
-                }
-                .apply()
+            .putString(ACCESS_TOKEN_KEY, credentials.accessToken)
+            .putString(REFRESH_TOKEN_KEY, credentials.refreshToken)
+            .apply {
+                credentials.expiresIn?.let { expiresIn -> putLong(EXPIRES_AT_KEY, System.currentTimeMillis() + expiresIn * 1000) }
+            }
+            .apply()
     }
 
     fun clearCredentials() {
@@ -60,17 +60,17 @@ internal class OAuthStore {
     private fun ensureNewKeys() {
         if (sp.contains(ACCESS_TOKEN_KEY_OLD)) {
             sp.edit()
-                    .putString(ACCESS_TOKEN_KEY, sp.getString(
-                        ACCESS_TOKEN_KEY_OLD, null))
-                    .remove(ACCESS_TOKEN_KEY_OLD)
-                    .apply()
+                .putString(ACCESS_TOKEN_KEY, sp.getString(
+                    ACCESS_TOKEN_KEY_OLD, null))
+                .remove(ACCESS_TOKEN_KEY_OLD)
+                .apply()
         }
         if (sp.contains(REFRESH_TOKEN_KEY_OLD)) {
             sp.edit()
-                    .putString(REFRESH_TOKEN_KEY, sp.getString(
-                        REFRESH_TOKEN_KEY_OLD, null))
-                    .remove(REFRESH_TOKEN_KEY_OLD)
-                    .apply()
+                .putString(REFRESH_TOKEN_KEY, sp.getString(
+                    REFRESH_TOKEN_KEY_OLD, null))
+                .remove(REFRESH_TOKEN_KEY_OLD)
+                .apply()
         }
     }
 }
