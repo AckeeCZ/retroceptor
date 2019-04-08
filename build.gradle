@@ -32,10 +32,13 @@ ext.libProperties = new Properties()
 ext.libProperties.load(file("${rootDir}/lib.properties").newReader())
 
 ext {
-    appcompatVersion = '1.1.0-alpha03'
+    appcompatVersion = '1.1.0-alpha04'
     retrofitVersion = '2.5.0'
     coroutinesVersion = '1.2.0-alpha'
     junitVersion = '4.12'
+    mockitoVersion = '1.10.19'
+    annotationVersion = '1.0.0'
+    espressoVersion = '3.1.0-alpha3'
 }
 
 //plugin doesn't understand well with kotlin documentation so disable javadoc generation

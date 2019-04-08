@@ -29,10 +29,15 @@ artifacts {
     archives sourcesJar
 }
 
-
 // Bintray
 Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
+// use bintray properties either locally or from system environments
+if (project.rootProject.file('local.properties').exists()) {
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+} else {
+    properties.setProperty('bintray.user', System.getenv('BINTRAY_USER') ?: '')
+    properties.setProperty('bintray.apikey', System.getenv('BINTRAY_APIKEY') ?: '')
+}
 
 bintray {
     user = properties.getProperty("bintray.user")

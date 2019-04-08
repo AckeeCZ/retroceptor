@@ -1,0 +1,37 @@
+language: android
+jdk: oraclejdk8
+env:
+  global:
+  - secure: "LfuJz5MKUICt7YnZguAE0Uoo6a5WMRsSEOyt2iY/erMHFsXqTQBNeP1lAkOZA5XSLrr8CGPxQ3SgcWyNsRs+HRIJJmQGIgaSzlHCYNkwaS/Z8sl6yIJ8LuthUc4bHpYQI2qE5/H3JHPmvvo6/Fl02imPB80u5eomMGNQUC4rG6ZyCw5KbQwGficVWy7TxbF3cGZLiLrbTvdeJLsqBBUJ5s6xvCrj5L4BQ0/xBnwcHwSjwbcejqKjxR4L5SM+Qbm+rZePGbazFOsu5c8o3JFdRZpMMlmmrLwOkNAaKneGuXA49I1u8nH/2g3Pad137i0thsgvKMecpq/F6XKom39sTi2c6AWYkeVb9nkuHhH1CiMDGvIX/SWST0Xe6AG7zB9tmjbu4RD8xpSzJBLwztNMlo7uT+z9EzgUUDRhxW4ku+4NKRmeWv/y4c8balXfq1XI5v1QPr4/UGux6ubcb+3e8t76gIZ9z8G/e6TodLmSDt0s02oCYSSYek9ZZ7w9eS7R6TRBjf61xFgpUboN1zutvGhbia8x457dcvqLi3Vd+8I7ibws+NftamzcjtBMRMZ+8IWLYhHBo1GBkeq37/MNx7VbIxNP3HuOgYdfLjd9cpHC/CfrNPcvg/0Yx8mmYEkpC1m8GvW9JXibsXKjwz7Ala8es0lEpchGMvFIuaUtDSA="
+  - secure: "frle8Lj9rYp8sZqHzeDhJpgttaWrsCiekAhAcdy9w3UE2AYiyibg1pQ2q3W4/YvrbaV43C4KvmmROkjTJswRy7AkUwOfqTv+70lBuJq8uWbN/I3S0IMP6M1NsWWMggl4klY2gQo35UC3627/cw4UC44uNPMXBi//aRtnP4ODSHVnvU3XwhhxNB0EUASu41HbIVkxO80yGLJNboQ1vrvvKmKYOchvISZVRB8nbuSn3bsF3R75OQFeo0Y5IYWUiDiRE+MNn8drQxRULLCG8SI9vrs4fnQHsy9ieQWo7YyeJiebK7DfwA3trgxLqQyxgQQWlGqmU1aiIcMsypadnanNXCGEKzRO8gLdjHAemzyFqbIW1u4NIrLyUzG3o3tinH1HSWhmNmlu9Q4ECepFxJVRHLS9vZErZlpeVVDzl0EPqMoS/L5XX8nrdKsGHOGSmMBx3PQrfha2hRmL880WTvQTbef35myp/mot5sJK4ZvMcse/h9NLWNvUCz/IeUznl2j2dmPOncVWr+8aI6cegTfwcFTHKd7BsXf02/eOaZ0+T/YenlyHf0ZPJQVJecAJ2+xKlNiMfCZRMrGtuthi7Y98OR6khcvlX+NcbgB3sW3LpbRSuCMx04rJeexJ/Xdsa5JpllnKpbc7J/deHkvT8RxCsDq7uf30ItY731jap2Ghf9g="
+android:
+  components:
+  - tools
+  - platform-tools
+  - android-28
+  licenses:
+  - 'android-sdk-preview-license-52d11cd2'
+  - 'android-sdk-license-.+'
+  - 'google-gdk-license-.+'
+
+before_install:
+  chmod +x gradlew
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+  - "$HOME/.android/build-cache"
+before_script:
+- echo yes | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2"
+- echo yes | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.2"
+script: ./gradlew test build
+deploy:
+  provider: script
+  script: ./gradlew clean && ./gradlew build && ./gradlew install && ./gradlew bintrayUpload
+  skip_cleanup: true
+  on:
+    branch: master
+    tags: true
