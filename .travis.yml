@@ -33,5 +33,4 @@ deploy:
   script: ./gradlew clean && ./gradlew build && ./gradlew install && ./gradlew bintrayUpload
   skip_cleanup: true
   on:
-    branch: master
     tags: true
