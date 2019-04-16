@@ -10,6 +10,8 @@ android {
         versionCode = libProperties['VERSION_CODE']
         versionName libProperties['VERSION_NAME']
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // needed for different module name and artifact id name
+        archivesBaseName = "coroutine-oauth"
     }
 
     buildTypes {
@@ -25,7 +27,7 @@ android {
 }
 
 dependencies {
-    implementation project(':retrofitadapter')
+    implementation project(':coroutineadapter')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"

@@ -1,1 +1,1 @@
-include ':app', ':coroutineoauth', ':retrofitadapter'
+include ':app', ':coroutineoauth', ':coroutineadapter'

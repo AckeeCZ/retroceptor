@@ -13,3 +13,12 @@ Simple coroutine extension, that adds support to Retrofit2 based projects which 
 implementation 'cz.ackee.ackroutine:coroutine-adapter:x.x.x'
 ```
 
+
+## coroutine-oauth
+### Description
+- `CoroutineOAuthManager` wraps `Deferred` jobs and checks access token expiration before 
+
+### Dependency
+```groovy
+implementation 'cz.ackee.ackroutine:coroutine-oauth:x.x.x'
+```
