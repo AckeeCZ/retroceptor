@@ -1,11 +1,10 @@
 package cz.ackee.retrofitadapter
 
-import cz.ackee.retrofitadapter.interceptor.BodyCallExecuteInterceptor
+import cz.ackee.retrofitadapter.chain.CallChain
 import cz.ackee.retrofitadapter.interceptor.CallFactoryInterceptor
-import cz.ackee.retrofitadapter.interceptor.ResponseCallExecuteInterceptor
-import kotlinx.coroutines.Deferred
+import cz.ackee.retrofitadapter.interceptor.CallInterceptor
+import retrofit2.Call
 import retrofit2.CallAdapter
-import retrofit2.Response
 import retrofit2.Retrofit
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -18,27 +17,13 @@ class AckroutineCallAdapterFactory(vararg interceptor: CallFactoryInterceptor) :
     private val interceptors = interceptor.toMutableList()
 
     override fun get(returnType: Type, annotations: Array<out Annotation>, retrofit: Retrofit): CallAdapter<*, *>? {
-        if (Deferred::class.java != getRawType(returnType)) {
+        if (Call::class.java != getRawType(returnType)) {
             return null
         }
 
-        if (returnType !is ParameterizedType) {
-            throw IllegalStateException("Deferred return type must be parameterized as Deferred<Foo> or Deferred<out Foo>")
-        }
+        check(returnType is ParameterizedType) { "Call return type must be parameterized as Call<Foo> or Call<out Foo>" }
 
         val responseType = getParameterUpperBound(0, returnType)
-        val rawDeferredType = getRawType(responseType)
-
-        val callInterceptor = if (rawDeferredType == Response::class.java) {
-            if (responseType !is ParameterizedType) {
-                throw IllegalStateException("Response must be parameterized as Response<Foo> or Response<out Foo>")
-            }
-
-            ResponseCallExecuteInterceptor()
-        } else {
-            BodyCallExecuteInterceptor()
-        }
-
-        return AckroutineCallAdapter<Any>(responseType, annotations, interceptors + callInterceptor)
+        return AckroutineCallAdapter<Any>(responseType, annotations, interceptors + CallInterceptor())
     }
 }

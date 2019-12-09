@@ -6,7 +6,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:3.3.2"
+        classpath 'com.android.tools.build:gradle:3.6.0-beta04'
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3"
         classpath "com.github.dcendents:android-maven-gradle-plugin:2.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -32,9 +32,9 @@ ext.libProperties = new Properties()
 ext.libProperties.load(file("${rootDir}/lib.properties").newReader())
 
 ext {
-    appcompatVersion = '1.1.0-alpha04'
-    retrofitVersion = '2.5.0'
-    coroutinesVersion = '1.2.0-alpha'
+    appcompatVersion = '1.1.0'
+    retrofitVersion = '2.6.1'
+    coroutinesVersion = '1.3.2'
     junitVersion = '4.12'
     mockitoVersion = '1.10.19'
     annotationVersion = '1.0.0'

@@ -15,13 +15,13 @@ class AckroutineCallAdapter<T>(
     private val responseType: Type,
     private val annotations: Array<out Annotation>,
     private val interceptors: List<CallFactoryInterceptor>
-) : CallAdapter<T, Deferred<T>> {
+) : CallAdapter<T, Call<T>> {
 
     override fun responseType() = responseType
 
     @Suppress("UNCHECKED_CAST")
-    override fun adapt(call: Call<T>): Deferred<T> {
+    override fun adapt(call: Call<T>): Call<T> {
         val chain = CallChainImpl(0, call, annotations, interceptors)
-        return chain.proceed(call) as Deferred<T>
+        return chain.proceed(call) as Call<T>
     }
 }

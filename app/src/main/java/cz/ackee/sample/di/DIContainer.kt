@@ -32,6 +32,8 @@ class DIContainer(app: App) : ViewModelProvider.Factory {
 
     val callAdapterFactory: AckroutineCallAdapterFactory = AckroutineCallAdapterFactory(OAuthCallInterceptor(oAuthManager))
 
+    //val tryCallAdapterFactory = TryCallAdapterFactory()
+
     val logouter = Logouter(app)
 
     val retrofitBuilder: Retrofit.Builder
@@ -49,6 +51,7 @@ class DIContainer(app: App) : ViewModelProvider.Factory {
             OkHttpClient.Builder()
                 .addNetworkInterceptor(oAuthManager.provideAuthInterceptor())
                 .build())
+        //.addCallAdapterFactory(callAdapterFactory)
         .addCallAdapterFactory(callAdapterFactory)
         .build()
         .create(ApiDescription::class.java)

@@ -16,16 +16,16 @@ class ApiInteractorImpl(
 ) : ApiInteractor {
 
     override suspend fun getData(): List<SampleItem> {
-        return apiDescription.getData().await()
+        return apiDescription.getData()
     }
 
     override suspend fun login(name: String, password: String): OAuthCredentials {
-        return authApiDescription.login(name, password).await().also {
+        return authApiDescription.login(name, password).also {
             oAuthManager.saveCredentials(it)
         }
     }
 
     override suspend fun logout() {
-        authApiDescription.logout().await()
+        authApiDescription.logout()
     }
 }

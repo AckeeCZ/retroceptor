@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import retrofit2.Call
 
 /**
  * Factory for [Deferred] api calls.
@@ -26,16 +27,16 @@ typealias DeferredCallFactory<T> = () -> Deferred<T>
  */
 class CoroutineOAuthManager internal constructor(
     private val oAuthStore: OAuthStore,
-    private val refreshTokenAction: (String) -> Deferred<OAuthCredentials>,
+    private val refreshTokenAction: suspend (String) -> OAuthCredentials,
     private val onRefreshTokenFailed: (Throwable) -> Unit = {},
     private val errorChecker: ErrorChecker = DefaultErrorChecker()
 ) {
 
-    constructor(sp: SharedPreferences, refreshTokenAction: (String) -> Deferred<OAuthCredentials>,
+    constructor(sp: SharedPreferences, refreshTokenAction: suspend (String) -> OAuthCredentials,
         onRefreshTokenFailed: (Throwable) -> Unit = {}, errorChecker: ErrorChecker = DefaultErrorChecker()) :
         this(OAuthStore(sp), refreshTokenAction, onRefreshTokenFailed, errorChecker)
 
-    constructor(context: Context, refreshTokenAction: (String) -> Deferred<OAuthCredentials>,
+    constructor(context: Context, refreshTokenAction: suspend (String) -> OAuthCredentials,
         onRefreshTokenFailed: (Throwable) -> Unit = {}, errorChecker: ErrorChecker = DefaultErrorChecker()) :
         this(OAuthStore(context), refreshTokenAction, onRefreshTokenFailed, errorChecker)
 
@@ -52,6 +53,10 @@ class CoroutineOAuthManager internal constructor(
     }
 
     fun provideAuthInterceptor() = OAuthInterceptor(oAuthStore)
+
+    fun <T> wrapAuthCheck(call: Call<T>): Call<T> {
+        return AuthAwareCall(call, { refreshAccessToken() }, oAuthStore, errorChecker)
+    }
 
     fun <T> wrapDeferred(callFactory: DeferredCallFactory<T>): Deferred<T> {
         return GlobalScope.async(start = CoroutineStart.LAZY) {
@@ -77,7 +82,7 @@ class CoroutineOAuthManager internal constructor(
 
     private suspend fun refreshAccessToken(): OAuthCredentials {
         return try {
-            refreshTokenAction(oAuthStore.refreshToken ?: "").await()
+            refreshTokenAction(oAuthStore.refreshToken ?: "")
         } catch (e: Exception) {
             if (errorChecker.invalidRefreshToken(e)) {
                 clearCredentials()

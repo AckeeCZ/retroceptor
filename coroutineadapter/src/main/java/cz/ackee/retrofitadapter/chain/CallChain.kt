@@ -10,7 +10,7 @@ interface CallChain {
 
     val annotations: Array<out Annotation>
 
-    fun proceed(call: Call<*>): Deferred<*>
+    fun proceed(call: Call<*>): Call<*>
 }
 
 class CallChainImpl(
@@ -26,8 +26,8 @@ class CallChainImpl(
     override val annotations: Array<out Annotation>
         get() = annotationArray
 
-    override fun proceed(call: Call<*>): Deferred<*> {
-        if (chainIndex + 1 > interceptors.size) {
+    override fun proceed(call: Call<*>): Call<*> {
+        if (chainIndex > interceptors.size) {
             throw IllegalStateException("chainIndex ${chainIndex + 1} does not match with actual interceptor size ${interceptors.size}")
         }
 
