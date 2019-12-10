@@ -1,6 +1,5 @@
 package cz.ackee.retrofitadapter
 
-import cz.ackee.retrofitadapter.chain.CallChain
 import cz.ackee.retrofitadapter.interceptor.CallFactoryInterceptor
 import cz.ackee.retrofitadapter.interceptor.CallInterceptor
 import retrofit2.Call

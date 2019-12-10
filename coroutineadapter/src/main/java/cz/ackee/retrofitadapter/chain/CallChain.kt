@@ -1,7 +1,6 @@
 package cz.ackee.retrofitadapter.chain
 
 import cz.ackee.retrofitadapter.interceptor.CallFactoryInterceptor
-import kotlinx.coroutines.Deferred
 import retrofit2.Call
 
 interface CallChain {
@@ -27,9 +26,7 @@ class CallChainImpl(
         get() = annotationArray
 
     override fun proceed(call: Call<*>): Call<*> {
-        if (chainIndex > interceptors.size) {
-            throw IllegalStateException("chainIndex ${chainIndex + 1} does not match with actual interceptor size ${interceptors.size}")
-        }
+        check(chainIndex + 1 > interceptors.size) {"chainIndex ${chainIndex + 1} does not match with actual interceptor size ${interceptors.size}" }
 
         val newChain = CallChainImpl(chainIndex + 1, call, annotations, interceptors)
         return interceptors[chainIndex].intercept(newChain)

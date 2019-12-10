@@ -1,6 +1,6 @@
 package cz.ackee.sample.interactor
 
-import cz.ackee.ackroutine.CoroutineOAuthManager
+import cz.ackee.ackroutine.OAuthManager
 import cz.ackee.ackroutine.core.OAuthCredentials
 import cz.ackee.sample.model.SampleItem
 import cz.ackee.sample.model.rest.ApiDescription
@@ -10,7 +10,7 @@ import cz.ackee.sample.model.rest.AuthApiDescription
  * Implementation of api
  */
 class ApiInteractorImpl(
-    private val oAuthManager: CoroutineOAuthManager,
+    private val oAuthManager: OAuthManager,
     private val apiDescription: ApiDescription,
     private val authApiDescription: AuthApiDescription
 ) : ApiInteractor {

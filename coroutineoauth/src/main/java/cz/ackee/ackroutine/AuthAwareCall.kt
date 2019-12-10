@@ -1,18 +1,13 @@
 package cz.ackee.ackroutine
 
-import android.util.Log
 import cz.ackee.ackroutine.core.ErrorChecker
 import cz.ackee.ackroutine.core.OAuthCredentials
 import cz.ackee.ackroutine.core.OAuthStore
 import cz.ackee.retrofitadapter.interceptor.CallDelegate
-import cz.ackee.retrofitadapter.interceptor.CallableDelegate
-import kotlinx.coroutines.*
-import okhttp3.Request
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.HttpException
 import retrofit2.Response
-import kotlin.coroutines.CoroutineContext
 
 /**
  * [CallDelegate] which handles token retrieval.

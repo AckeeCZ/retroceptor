@@ -3,19 +3,21 @@ package cz.ackee.ackroutine
 import cz.ackee.ackroutine.core.DefaultOAuthCredentials
 import cz.ackee.ackroutine.core.OAuthCredentials
 import cz.ackee.ackroutine.core.OAuthStore
+import cz.ackee.retrofitadapter.interceptor.CallableDelegate
 import junit.framework.TestCase.*
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.runBlocking
+import okhttp3.MediaType
+import okhttp3.Request
 import okhttp3.ResponseBody
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.HttpException
 import retrofit2.Response
 
 /**
- * Tests for [CoroutineOAuthManager] class.
+ * Tests for [OAuthManager] class.
  */
 class OAuthManagerTest {
 
@@ -30,9 +32,42 @@ class OAuthManagerTest {
 
     private val store = OAuthStore(MockedSharedPreferences())
 
-    private val refreshAction: (String) -> Deferred<OAuthCredentials> = { refresh ->
-        if (refresh == refreshToken) CompletableDeferred(credentials) else throw unauthorizedException
+    private val refreshAction: suspend (String) -> OAuthCredentials = ::refreshToken
+
+    private suspend fun refreshToken(token: String): OAuthCredentials {
+        return if (token == refreshToken) credentials else throw unauthorizedException
     }
+
+    private val successCall = object : CallableDelegate<String> {
+        override fun enqueue(callback: Callback<String>) {
+            callback.onResponse(this, Response.success(successResult))
+        }
+        override fun isExecuted(): Boolean = false
+        override fun clone(): Call<String> = this
+        override fun isCanceled(): Boolean = false
+        override fun cancel() {}
+        override fun execute(): Response<String> = throw NotImplementedError()
+        override fun request(): Request = throw NotImplementedError()
+    }
+
+    private val failureCall = object : CallableDelegate<String> {
+        override fun enqueue(callback: Callback<String>) {
+            val response = Response.error<Any>(
+                403,
+                ResponseBody.create(MediaType.parse("application/json"), "{ reason: \"donno\"")
+            )
+
+            callback.onFailure(this, HttpException(response))
+        }
+        override fun isExecuted(): Boolean = false
+        override fun clone(): Call<String> = this
+        override fun isCanceled(): Boolean = false
+        override fun cancel() {}
+        override fun execute(): Response<String> = throw NotImplementedError()
+        override fun request(): Request = throw NotImplementedError()
+    }
+
+
 
     private var firstRun = true
 
@@ -49,20 +84,32 @@ class OAuthManagerTest {
 
     @Test
     fun testSuccessRequest() {
-        val manager = CoroutineOAuthManager(store, refreshAction)
-        assertEquals(runBlocking { manager.wrapDeferred { CompletableDeferred(successResult) }.await() }, successResult)
+        val manager = OAuthManager(store, refreshAction)
+
+        manager.wrapAuthCheck(successCall).enqueue(object : Callback<String> {
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                throw IllegalStateException("Unexpected case")
+            }
+
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                assertEquals(response.body(), successResult)
+            }
+        })
     }
 
-    @Test(expected = HttpException::class)
+    @Test
     fun testErrorRequest() {
-        val manager = CoroutineOAuthManager(store, refreshAction)
-        runBlocking {
-            manager.wrapDeferred {
-                CompletableDeferred<Unit>(null).apply {
-                    completeExceptionally(httpException)
-                }
-            }.await()
-        }
+        val manager = OAuthManager(store, refreshAction)
+
+        manager.wrapAuthCheck(failureCall).enqueue(object : Callback<String> {
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                assertTrue(t is HttpException)
+            }
+
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                throw IllegalStateException("Unexpected case")
+            }
+        })
     }
 
     @Test
@@ -70,38 +117,32 @@ class OAuthManagerTest {
         store.saveCredentials(credentials.copy(expiresIn = -1))
         assertTrue(store.tokenExpired())
 
-        val manager = CoroutineOAuthManager(store, refreshAction)
-        runBlocking { manager.wrapDeferred { CompletableDeferred(successResult) }.await() }
+        val manager = OAuthManager(store, refreshAction)
+        manager.wrapAuthCheck(successCall).enqueue(object : Callback<String> {
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                throw IllegalStateException("Unexpected case")
+            }
 
-        assertFalse(store.tokenExpired())
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                assertFalse(store.tokenExpired())
+            }
+        })
     }
 
     @Test
-    fun testExpiredAccessTokenSuccessRefresh() {
-        val manager = CoroutineOAuthManager(store, refreshAction)
-
-        val result = runBlocking {
-            manager.wrapDeferred {
-                if (firstRun) {
-                    firstRun = false
-                    throw unauthorizedException
-                } else {
-                    CompletableDeferred(successResult)
-                }
-            }.await()
-        }
-
-        assertEquals(successResult, result)
-    }
-
-    @Test(expected = HttpException::class)
     fun testExpiredAccessTokenErrorRefresh() {
         store.saveCredentials(credentials.copy(expiresIn = -1, refreshToken = refreshToken.reversed()))
-        val manager = CoroutineOAuthManager(store, refreshAction)
+        val manager = OAuthManager(store, refreshAction)
 
-        runBlocking {
-            manager.wrapDeferred { CompletableDeferred(successResult) }.await()
-        }
+        manager.wrapAuthCheck(failureCall).enqueue(object : Callback<String> {
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                assertTrue(t is HttpException)
+            }
+
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                throw IllegalStateException("Unexpected case")
+            }
+        })
     }
 
     private fun refreshStore() {

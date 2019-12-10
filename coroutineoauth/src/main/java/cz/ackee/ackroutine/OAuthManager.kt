@@ -3,10 +3,7 @@ package cz.ackee.ackroutine
 import android.content.Context
 import android.content.SharedPreferences
 import cz.ackee.ackroutine.core.*
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import retrofit2.Call
 
 /**
@@ -20,7 +17,7 @@ import retrofit2.Call
  * The user may provide custom [ErrorChecker] containing access and refresh token expiration
  * checking logic. Otherwise, [DefaultErrorChecker] is applied.
  */
-class CoroutineOAuthManager internal constructor(
+class OAuthManager internal constructor(
     private val oAuthStore: OAuthStore,
     private val refreshTokenAction: suspend (String) -> OAuthCredentials,
     private val onRefreshTokenFailed: (Throwable) -> Unit = {},

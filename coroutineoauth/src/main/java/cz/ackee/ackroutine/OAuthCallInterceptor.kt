@@ -1,6 +1,5 @@
 package cz.ackee.ackroutine
 
-import android.util.Log
 import cz.ackee.retrofitadapter.AckroutineCallAdapter
 import cz.ackee.retrofitadapter.chain.CallChain
 import cz.ackee.retrofitadapter.interceptor.CallFactoryInterceptor
@@ -11,7 +10,7 @@ import retrofit2.Call
  * [AckroutineCallAdapter] interceptor that conditionally wraps original [Deferred] future with
  * token check & retrieval logic.
  */
-class OAuthCallInterceptor(private val oAuthManager: CoroutineOAuthManager) : CallFactoryInterceptor {
+class OAuthCallInterceptor(private val oAuthManager: OAuthManager) : CallFactoryInterceptor {
 
     override fun intercept(chain: CallChain): Call<*> {
         return if (chain.annotations.any { it is IgnoreAuth }) {

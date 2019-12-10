@@ -2,7 +2,6 @@ package cz.ackee.retrofitadapter
 
 import cz.ackee.retrofitadapter.chain.CallChainImpl
 import cz.ackee.retrofitadapter.interceptor.CallFactoryInterceptor
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import retrofit2.Call
 import retrofit2.CallAdapter
