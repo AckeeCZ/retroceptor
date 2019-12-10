@@ -26,7 +26,7 @@ class CallChainImpl(
         get() = annotationArray
 
     override fun proceed(call: Call<*>): Call<*> {
-        check(chainIndex + 1 > interceptors.size) {"chainIndex ${chainIndex + 1} does not match with actual interceptor size ${interceptors.size}" }
+        check(chainIndex > interceptors.lastIndex) {"chainIndex ${chainIndex + 1} does not match with actual interceptor size ${interceptors.size}" }
 
         val newChain = CallChainImpl(chainIndex + 1, call, annotations, interceptors)
         return interceptors[chainIndex].intercept(newChain)

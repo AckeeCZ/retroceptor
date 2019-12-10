@@ -1,7 +1,6 @@
 package cz.ackee.ackroutine.core
 
 import android.text.TextUtils
-import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.Response
 
@@ -13,8 +12,6 @@ class OAuthInterceptor internal constructor(private val oAuthStore: OAuthStore) 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
         val builder = originalRequest.newBuilder()
-
-        Log.e(OAuthInterceptor::class.java.simpleName, "Intercepting, token: ${oAuthStore.accessToken}")
 
         if (!TextUtils.isEmpty(oAuthStore.accessToken)) {
             val accToken = oAuthStore.accessToken

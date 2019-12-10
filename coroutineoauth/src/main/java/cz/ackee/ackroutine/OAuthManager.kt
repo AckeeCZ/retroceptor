@@ -7,7 +7,7 @@ import kotlinx.coroutines.Deferred
 import retrofit2.Call
 
 /**
- * CoorutineOAuthManager provides wrapping for [Deferred] future values, which automatically handles
+ * OAuthManager provides wrapping for Retrofit [Call]s, which automatically handles
  * access token expiration and performs refresh token logic defined with [refreshTokenAction],
  * provided by user.
  * In case of success, new credentials are stored in [OAuthStore].
