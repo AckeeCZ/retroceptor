@@ -33,7 +33,7 @@ ext {
     publishedArtifactId = 'coroutine-adapter'
 
     libraryName = 'Coroutine Retrofit adapter'
-    libraryDescription = 'General purpose Retrofit adapter that allows intercepting calls and mapping to Deferred'
+    libraryDescription = 'General purpose Retrofit adapter that allows intercepting calls'
 }
 
 apply from: rootProject.file('gradle/bintray/install.gradle')

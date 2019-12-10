@@ -13,12 +13,12 @@ interface AuthApiDescription {
 
     @IgnoreAuth
     @POST("login")
-    fun login(@Query("username") name: String, @Query("password") passwd: String): Deferred<DefaultOAuthCredentials>
+    suspend fun login(@Query("username") name: String, @Query("password") passwd: String): DefaultOAuthCredentials
 
     @IgnoreAuth
     @POST("refresh_token")
-    fun refreshAccessToken(@Query("refresh_token") refreshToken: String?): Deferred<DefaultOAuthCredentials>
+    suspend fun refreshAccessToken(@Query("refresh_token") refreshToken: String?): DefaultOAuthCredentials
 
     @POST("logout")
-    fun logout(): Deferred<Unit>
+    suspend fun logout()
 }

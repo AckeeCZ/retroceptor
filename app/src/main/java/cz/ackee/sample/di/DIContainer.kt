@@ -2,7 +2,7 @@ package cz.ackee.sample.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import cz.ackee.ackroutine.CoroutineOAuthManager
+import cz.ackee.ackroutine.OAuthManager
 import cz.ackee.ackroutine.OAuthCallInterceptor
 import cz.ackee.retrofitadapter.AckroutineCallAdapterFactory
 import cz.ackee.sample.App
@@ -24,7 +24,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 
 class DIContainer(app: App) : ViewModelProvider.Factory {
 
-    val oAuthManager = CoroutineOAuthManager(
+    val oAuthManager = OAuthManager(
         context = app,
         refreshTokenAction = { authApiDescription.refreshAccessToken(it) },
         onRefreshTokenFailed = { logouter.logout() }
@@ -48,7 +48,8 @@ class DIContainer(app: App) : ViewModelProvider.Factory {
         .client(
             OkHttpClient.Builder()
                 .addNetworkInterceptor(oAuthManager.provideAuthInterceptor())
-                .build())
+                .build()
+        )
         .addCallAdapterFactory(callAdapterFactory)
         .build()
         .create(ApiDescription::class.java)

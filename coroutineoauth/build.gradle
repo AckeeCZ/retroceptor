@@ -42,7 +42,7 @@ ext {
     publishedArtifactId = 'coroutine-oauth'
 
     libraryName = 'Coroutine OAuth'
-    libraryDescription = 'Coroutine Extension to support OAuth2'
+    libraryDescription = 'Coroutine Extension for Retrofit to support OAuth2'
 }
 
 apply from: rootProject.file('gradle/bintray/install.gradle')

@@ -1,7 +1,7 @@
 package cz.ackee.sample.detail
 
 import androidx.lifecycle.ViewModel
-import cz.ackee.ackroutine.CoroutineOAuthManager
+import cz.ackee.ackroutine.OAuthManager
 import cz.ackee.ackroutine.core.DefaultOAuthCredentials
 import cz.ackee.sample.interactor.ApiInteractor
 import cz.ackee.sample.model.Logouter
@@ -20,7 +20,7 @@ import kotlin.coroutines.CoroutineContext
  */
 class DetailViewModel(
     private val api: ApiInteractor,
-    private val oAuthManager: CoroutineOAuthManager,
+    private val oAuthManager: OAuthManager,
     private val logouter: Logouter
 ) : ViewModel(), CoroutineScope {
 

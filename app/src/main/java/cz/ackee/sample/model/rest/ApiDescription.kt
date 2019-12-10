@@ -10,5 +10,5 @@ import retrofit2.http.GET
 interface ApiDescription {
 
     @GET("items")
-    fun getData(): Deferred<List<SampleItem>>
+    suspend fun getData(): List<SampleItem>
 }
