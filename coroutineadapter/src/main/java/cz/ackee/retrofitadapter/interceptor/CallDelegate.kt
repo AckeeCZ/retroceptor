@@ -5,12 +5,14 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+interface CallableDelegate<OUT>: Call<OUT>
+
 abstract class CallDelegate<IN, OUT>(
     protected val proxy: Call<IN>
-) : Call<OUT> {
+) : CallableDelegate<OUT> {
     override fun execute(): Response<OUT> = throw NotImplementedError()
-    final override fun enqueue(callback: Callback<OUT>) = enqueueImpl(callback)
-    final override fun clone(): Call<OUT> = cloneImpl()
+    override fun enqueue(callback: Callback<OUT>) = enqueueImpl(callback)
+    override fun clone(): Call<OUT> = cloneImpl()
 
     override fun cancel() = proxy.cancel()
     override fun request(): Request = proxy.request()

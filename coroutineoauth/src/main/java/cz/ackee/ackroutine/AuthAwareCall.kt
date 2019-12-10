@@ -5,10 +5,14 @@ import cz.ackee.ackroutine.core.ErrorChecker
 import cz.ackee.ackroutine.core.OAuthCredentials
 import cz.ackee.ackroutine.core.OAuthStore
 import cz.ackee.retrofitadapter.interceptor.CallDelegate
-import kotlinx.coroutines.runBlocking
+import cz.ackee.retrofitadapter.interceptor.CallableDelegate
+import kotlinx.coroutines.*
+import okhttp3.Request
 import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.HttpException
 import retrofit2.Response
+import kotlin.coroutines.CoroutineContext
 
 /**
  * [CallDelegate] which handles token retrieval.
@@ -22,10 +26,8 @@ internal class AuthAwareCall<T>(
 
     override fun enqueueImpl(callback: Callback<T>) {
         if (store.tokenExpired()) {
-            Log.d("D_OAUTH_CALL", "TOKEN EXPIRED, LOAD AND CALL")
             refreshAndExecute(call, callback)
         } else {
-            Log.d("D_OAUTH_CALL", "TOKEN OK, CALL")
             executeAndRefreshIfNeeded(call, callback)
         }
     }
@@ -35,14 +37,19 @@ internal class AuthAwareCall<T>(
     }
 
     private fun refreshAndExecute(call: Call<T>, callback: Callback<T>) {
-        // TODO: create a premise and chain with next call
-        val tokens = runBlocking { refreshAction(store.refreshToken ?: "") }
-        store.saveCredentials(tokens)
+        val tokenCall = CoroutineCall {
+            val value = refreshAction(store.refreshToken ?: "")
+            store.saveCredentials(value)
+        } as Call<Unit>
 
-        call.execute(
-            success = { callback.onResponse(this, it) },
-            failure = { callback.onFailure(this, it) }
-        )
+        tokenCall.execute(success = { _ ->
+            call.execute(
+                success = { callback.onResponse(this, it) },
+                failure = { callback.onFailure(this, it) }
+            )
+        }, failure = {
+            callback.onFailure(this, it)
+        })
     }
 
     private fun executeAndRefreshIfNeeded(call: Call<T>, callback: Callback<T>) {
@@ -58,16 +65,18 @@ internal class AuthAwareCall<T>(
         )
     }
 
-    private fun Call<T>.execute(success: (Response<T>) -> Unit, failure: (Throwable) -> Unit) {
-        enqueue(object : Callback<T> {
-            override fun onFailure(call: Call<T>, t: Throwable) {
-                Log.d("D_OAUTH_CALL_D", "CALL FAIL, ${t}")
+    private fun <U> Call<U>.execute(success: (Response<U>) -> Unit, failure: (Throwable) -> Unit) {
+        enqueue(object : Callback<U> {
+            override fun onFailure(call: Call<U>, t: Throwable) {
                 failure(t)
             }
 
-            override fun onResponse(call: Call<T>, response: Response<T>) {
-                Log.d("D_OAUTH_CALL_D", "CALL OK, ${response}")
-                success(response)
+            override fun onResponse(call: Call<U>, response: Response<U>) {
+                if (response.isSuccessful) {
+                    success(response)
+                } else {
+                    failure(HttpException(response))
+                }
             }
         })
     }

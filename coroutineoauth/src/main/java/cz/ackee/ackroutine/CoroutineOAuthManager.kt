@@ -10,11 +10,6 @@ import kotlinx.coroutines.async
 import retrofit2.Call
 
 /**
- * Factory for [Deferred] api calls.
- */
-typealias DeferredCallFactory<T> = () -> Deferred<T>
-
-/**
  * CoorutineOAuthManager provides wrapping for [Deferred] future values, which automatically handles
  * access token expiration and performs refresh token logic defined with [refreshTokenAction],
  * provided by user.
@@ -40,9 +35,11 @@ class CoroutineOAuthManager internal constructor(
         onRefreshTokenFailed: (Throwable) -> Unit = {}, errorChecker: ErrorChecker = DefaultErrorChecker()) :
         this(OAuthStore(context), refreshTokenAction, onRefreshTokenFailed, errorChecker)
 
-    val accessToken get() = oAuthStore.accessToken
+    val accessToken: String?
+        get() = oAuthStore.accessToken
 
-    val refreshToken get() = oAuthStore.refreshToken
+    val refreshToken: String?
+        get() = oAuthStore.refreshToken
 
     fun saveCredentials(credentials: OAuthCredentials) {
         oAuthStore.saveCredentials(credentials)
@@ -56,28 +53,6 @@ class CoroutineOAuthManager internal constructor(
 
     fun <T> wrapAuthCheck(call: Call<T>): Call<T> {
         return AuthAwareCall(call, { refreshAccessToken() }, oAuthStore, errorChecker)
-    }
-
-    fun <T> wrapDeferred(callFactory: DeferredCallFactory<T>): Deferred<T> {
-        return GlobalScope.async(start = CoroutineStart.LAZY) {
-            if (oAuthStore.tokenExpired()) {
-                saveCredentials(refreshAccessToken())
-
-                callFactory().await()
-            } else {
-                try {
-                    callFactory().await()
-                } catch (e: Exception) {
-                    if (errorChecker.invalidAccessToken(e)) {
-                        saveCredentials(refreshAccessToken())
-
-                        callFactory().await()
-                    } else {
-                        throw e
-                    }
-                }
-            }
-        }
     }
 
     private suspend fun refreshAccessToken(): OAuthCredentials {
