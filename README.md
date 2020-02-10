@@ -1,11 +1,11 @@
 [![Build Status](https://travis-ci.org/AckeeCZ/ackroutine-adapter.svg?branch=master)](https://travis-ci.org/AckeeCZ/ackroutine-adapter) [ ![Download](https://api.bintray.com/packages/ackeecz/ackroutine-adapter/coroutine-adapter/images/download.svg) ](https://bintray.com/ackeecz/ackroutine-adapter/coroutine-adapter/_latestVersion)
 
 # Coroutine OAuth Android Library
-Simple coroutine extension, that adds support to Retrofit2 based projects which uses OAuth2 authentication.
+Simple coroutine extension, which makes use of Retrofit2 internal `Call<T>` to suspending function conversion to add support for 
+OAuth and custom request modifiers.
 
 ## coroutine-adapter
 ### Description
-- Provides `Deferred` job wrapping for Retrofit `Call`s.
 - Provides a chainable abstraction with `CallFactoryInterceptor` allowing you to define custom interceptors to alter network requests behaviour.
 
 ### Dependency
@@ -16,13 +16,29 @@ implementation 'cz.ackee.ackroutine:coroutine-adapter:x.x.x'
 ### Usage
 When creating your API service, just provide `AckroutineCallAdapterFactory` with custom defined `CallChainInterceptor`s to Retrofit builder.
 ```kotlin
-    class MyLoggingInterceptor: CallFactoryInterceptor {
-        override fun intercept(chain: CallChain): Deferred<*> {
-            // Log details of chain.call.request()
-            // ...
-            return chain.proceed(chain.call)
+    class MyLoggingInterceptor : CallFactoryInterceptor {
+    
+        override fun intercept(chain: CallChain): Call<*> {
+            return chain.proceed(LoggingCall(chain.call))
         }
     }
+    
+    class LoggingCall<T>(private val call: Call<T>) : CallDelegate<T, T>(call) {
+        override fun cloneImpl(): Call<T> = LoggingCall(call.clone())
+    
+        override fun enqueueImpl(callback: Callback<T>) {
+            call.enqueue(object : Callback<T> {
+                override fun onFailure(call: Call<T>, t: Throwable) {
+                    // check if error is something you want to log and proceed
+                }
+    
+                override fun onResponse(call: Call<T>, response: Response<T>) {
+                    callback.onResponse(call, response)
+                }
+            })
+        }
+    }
+
 
     val apiDescription = retrofitBuilder
         .addCallAdapterFactory(AckroutineCallAdapterFactory(MyLoggingInterceptor()))
@@ -34,7 +50,7 @@ When creating your API service, just provide `AckroutineCallAdapterFactory` with
 ## coroutine-oauth
 ### Description
 - `CoorutineOAuthManager` handles access token expiration and performs token refresh. In case of success, new credentials are stored in `SharedPreferences`. When refresh token is invalid, the optional logic provided in `onRefreshTokenFailed` is performed. With custom `ErrorChecker`, the user may customize access and refresh tokens errors validation
-- `OAuthInterceptor`, which is provided by `CoroutineOAuthManager` adds `Authorization` header with access token to OkHttp requests
+- `OAuthInterceptor`, which makes use of `OAuthManager` and adds `Authorization` header with access token to OkHttp requests
 - `DefaultOAuthCredentials` is the default implementation of `OAuthCredentials` 
 
 ### Dependency
@@ -46,8 +62,8 @@ implementation 'cz.ackee.ackroutine:coroutine-oauth:x.x.x'
 Working sample is provided in `app` module.
 
 #### Initialization
-Create a `CoroutineOAuthManager` typically in API access layer (in our case, ApiInteractor):
-Create necessary supporting components: `CoroutineOAuthManager` and `AckroutneCallAdapterFactory` which will be provided to Retrofit to create an API Service.
+Create a `OAuthManager` typically in API access layer (in our case, ApiInteractor):
+Create necessary supporting components: `OAuthManager` and `AckroutneCallAdapterFactory` which will be provided to Retrofit to create an API Service.
 Simply annotate API Service interface method with `@IgnoreAuth` to skip access token injection into request headers.
 ```kotlin
 val oAuthManager = CoroutineOAuthManager(
@@ -61,21 +77,27 @@ val callAdapterFactory: AckroutineCallAdapterFactory = AckroutineCallAdapterFact
 Use created API Service in `ApiInteractor` to perform network calls.
 ```kotlin
 class ApiInteractor(
-    private val oAuthManager: CoroutineOAuthManager,
-    private val apiDescription: ApiDescription
+    private val api: ApiDescription,
+    private val oAuthManager: CoroutineOAuthManager
 ) {
-    suspend fun getData(): List<SampleItem> {
-        return apiDescription.getData().await()
+    suspend fun fetchData(): List<SampleItem> {
+        return api.fetchData()
     }
+}
+
+interface ApiDescription {
+
+    @GET("your-resource-url")
+    suspend fun fetchData(): List<SampleItem>
 }
 ```
 
 #### Storing credentials
 You can save OAuth credentials with `saveCredentials(credentials: OAuthCredentials)` method. You may want to do this after receiving credentials from server, e.g. after login or sign in.
 ```kotlin
-suspend fun login(name: String, password: String): OAuthCredentials {
-    return authApiDescription.login(name, password).await().also {
-        oAuthManager.saveCredentials(it)
+suspend fun login(username: String, password: String): User {
+    return with(api.login(ApiUsernameLoginRequest(username, password))) {
+        oAuthManager.saveCredentials(credentials)
     }
 }  
 ```
@@ -84,7 +106,7 @@ suspend fun login(name: String, password: String): OAuthCredentials {
 After logging out, you may want to remove credentials from the store.
 ```kotlin
 suspend fun logout() {
-    authDescription.logout().await().also {
+    authDescription.logout().also {
         oAuthManager.clearCredentials()
     }
 }
