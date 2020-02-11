@@ -1,8 +1,7 @@
 [![Build Status](https://travis-ci.org/AckeeCZ/ackroutine-adapter.svg?branch=master)](https://travis-ci.org/AckeeCZ/ackroutine-adapter) [ ![Download](https://api.bintray.com/packages/ackeecz/ackroutine-adapter/coroutine-adapter/images/download.svg) ](https://bintray.com/ackeecz/ackroutine-adapter/coroutine-adapter/_latestVersion)
 
 # Coroutine OAuth Android Library
-Simple coroutine extension, which makes use of Retrofit2 internal `Call<T>` to suspending function conversion to add support for 
-OAuth and custom request modifiers.
+Simple coroutine extension, which makes use of Retrofit2 internal `Call<T>` to suspending function conversion to add support for OAuth and custom request modifiers.
 
 ## coroutine-adapter
 ### Description
