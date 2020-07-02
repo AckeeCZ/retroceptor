@@ -6,15 +6,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import okhttp3.Request
+import okio.Timeout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
 /**
  * [CallableDelegate] which invokes suspending function.
  */
 internal class CoroutineCall<OUT>(val operation: suspend () -> OUT) : CallableDelegate<OUT>, CoroutineScope {
+
+    companion object {
+
+        private const val TIMEOUT_S: Long = 15
+    }
 
     private val job = Job()
 
@@ -56,5 +63,9 @@ internal class CoroutineCall<OUT>(val operation: suspend () -> OUT) : CallableDe
 
     override fun request(): Request {
         throw NotImplementedError()
+    }
+
+    override fun timeout(): Timeout {
+        return Timeout().timeout(TIMEOUT_S, TimeUnit.SECONDS)
     }
 }
