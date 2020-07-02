@@ -34,7 +34,7 @@ ext.libProperties.load(file("${rootDir}/lib.properties").newReader())
 ext {
     appcompatVersion = '1.1.0'
     retrofitVersion = '2.8.1'
-    coroutinesVersion = '1.3.5'
+    coroutinesVersion = '1.3.7'
     junitVersion = '4.13'
     mockitoVersion = '3.3.3'
     annotationVersion = '1.0.0'
