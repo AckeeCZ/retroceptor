@@ -4,10 +4,13 @@ import cz.ackee.ackroutine.core.DefaultOAuthCredentials
 import cz.ackee.ackroutine.core.OAuthCredentials
 import cz.ackee.ackroutine.core.OAuthStore
 import cz.ackee.retrofitadapter.interceptor.CallableDelegate
-import junit.framework.TestCase.*
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertTrue
 import okhttp3.MediaType
 import okhttp3.Request
 import okhttp3.ResponseBody
+import okio.Timeout
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -42,12 +45,14 @@ class OAuthManagerTest {
         override fun enqueue(callback: Callback<String>) {
             callback.onResponse(this, Response.success(successResult))
         }
+
         override fun isExecuted(): Boolean = false
         override fun clone(): Call<String> = this
         override fun isCanceled(): Boolean = false
         override fun cancel() {}
         override fun execute(): Response<String> = throw NotImplementedError()
         override fun request(): Request = throw NotImplementedError()
+        override fun timeout(): Timeout = Timeout.NONE
     }
 
     private val failureCall = object : CallableDelegate<String> {
@@ -59,15 +64,15 @@ class OAuthManagerTest {
 
             callback.onFailure(this, HttpException(response))
         }
+
         override fun isExecuted(): Boolean = false
         override fun clone(): Call<String> = this
         override fun isCanceled(): Boolean = false
         override fun cancel() {}
         override fun execute(): Response<String> = throw NotImplementedError()
         override fun request(): Request = throw NotImplementedError()
+        override fun timeout(): Timeout = Timeout.NONE
     }
-
-
 
     private var firstRun = true
 
