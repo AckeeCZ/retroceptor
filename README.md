@@ -14,6 +14,9 @@ implementation 'cz.ackee.ackroutine:coroutine-adapter:x.x.x'
 
 ### Usage
 When creating your API service, just provide `AckroutineCallAdapterFactory` with custom defined `CallChainInterceptor`s to Retrofit builder.
+
+**Caution!** Do not add multiple `AckroutineCallAdapterFactory` instances, because only the first one will be used due to Retrofit implementation.
+When you want to provide multiple interceptors, just pass all of them to single `AckroutineCallAdapterFactory` as illustrated in the example below:
 ```kotlin
     class MyLoggingInterceptor : CallFactoryInterceptor {
     
@@ -40,7 +43,12 @@ When creating your API service, just provide `AckroutineCallAdapterFactory` with
 
 
     val apiDescription = retrofitBuilder
-        .addCallAdapterFactory(AckroutineCallAdapterFactory(MyLoggingInterceptor()))
+        .addCallAdapterFactory(
+            AckroutineCallAdapterFactory(
+                MyLoggingInterceptor(),
+                AnotherCustomInterceptor()
+            )
+        )
         .build()
         .create(ApiDescription::class.java)
 ```
