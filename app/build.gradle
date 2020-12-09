@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId "cz.ackee.sample"
         minSdkVersion 23
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode = libProperties['VERSION_CODE']
         versionName libProperties['VERSION_NAME']
     }

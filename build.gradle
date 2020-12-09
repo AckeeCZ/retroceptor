@@ -1,12 +1,12 @@
 buildscript {
-    ext.kotlin_version = '1.3.72'
+    ext.kotlin_version = '1.4.21'
 
     repositories {
         google()
         jcenter()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.0.0"
+        classpath "com.android.tools.build:gradle:4.1.1"
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3"
         classpath "com.github.dcendents:android-maven-gradle-plugin:2.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -32,13 +32,11 @@ ext.libProperties = new Properties()
 ext.libProperties.load(file("${rootDir}/lib.properties").newReader())
 
 ext {
-    appcompatVersion = '1.1.0'
-    retrofitVersion = '2.8.1'
-    coroutinesVersion = '1.3.7'
-    junitVersion = '4.13'
-    mockitoVersion = '3.3.3'
-    annotationVersion = '1.0.0'
-    espressoVersion = '3.1.0-alpha3'
+    appcompatVersion = '1.2.0'
+    retrofitVersion = '2.9.0'
+    coroutinesVersion = '1.4.2'
+    junitVersion = '4.13.1'
+    mockitoVersion = '3.6.28'
 }
 
 //plugin doesn't understand well with kotlin documentation so disable javadoc generation
