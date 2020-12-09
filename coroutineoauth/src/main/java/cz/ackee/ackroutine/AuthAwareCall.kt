@@ -17,7 +17,7 @@ internal class AuthAwareCall<T>(
     private val refreshAction: suspend (String) -> OAuthCredentials,
     private val store: OAuthStore,
     private val errorChecker: ErrorChecker
-): CallDelegate<T, T>(call) {
+) : CallDelegate<T, T>(call) {
 
     override fun enqueueImpl(callback: Callback<T>) {
         if (store.tokenExpired()) {
@@ -35,7 +35,7 @@ internal class AuthAwareCall<T>(
         val tokenCall = CoroutineCall {
             val value = refreshAction(store.refreshToken ?: "")
             store.saveCredentials(value)
-        } as Call<Unit>
+        }
 
         tokenCall.execute(success = { _ ->
             call.execute(
