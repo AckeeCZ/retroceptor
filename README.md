@@ -65,7 +65,7 @@ Create a `OAuthManager` typically in API access layer (in our case, ApiInteracto
 Create necessary supporting components: `OAuthManager` and `AckroutneCallAdapterFactory` which will be provided to Retrofit to create an API Service.
 Simply annotate API Service interface method with `@IgnoreAuth` to skip access token injection into request headers.
 ```kotlin
-val oAuthManager = CoroutineOAuthManager(
+val oAuthManager = OAuthManager(
         context = app,
         refreshTokenAction = { authApiDescription.refreshAccessToken(it) },
         onRefreshTokenFailed = { logouter.logout() }
