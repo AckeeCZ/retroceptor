@@ -1,8 +1,8 @@
 package cz.ackee.ackroutine
 
-import cz.ackee.ackroutine.core.ErrorChecker
-import cz.ackee.ackroutine.core.OAuthCredentials
-import cz.ackee.ackroutine.core.OAuthStore
+import cz.ackee.ackroutine.core.AuthCredentials
+import cz.ackee.ackroutine.core.AuthErrorChecker
+import cz.ackee.ackroutine.core.AuthStore
 import cz.ackee.retrofitadapter.interceptor.CallDelegate
 import retrofit2.Call
 import retrofit2.Callback
@@ -10,17 +10,17 @@ import retrofit2.HttpException
 import retrofit2.Response
 
 /**
- * [CallDelegate] which handles token retrieval.
+ * [CallDelegate] which handles credentials retrieval.
  */
-internal class AuthAwareCall<T>(
+internal class AuthAwareCall<T, C : AuthCredentials>(
     private val call: Call<T>,
-    private val refreshAction: suspend (String) -> OAuthCredentials,
-    private val store: OAuthStore,
-    private val errorChecker: ErrorChecker
+    private val refreshAction: suspend (C?) -> C,
+    private val store: AuthStore<C>,
+    private val errorChecker: AuthErrorChecker
 ) : CallDelegate<T, T>(call) {
 
     override fun enqueueImpl(callback: Callback<T>) {
-        if (store.tokenExpired()) {
+        if (store.credentialsExpired()) {
             refreshAndExecute(call, callback)
         } else {
             executeAndRefreshIfNeeded(call, callback)
@@ -33,7 +33,7 @@ internal class AuthAwareCall<T>(
 
     private fun refreshAndExecute(call: Call<T>, callback: Callback<T>) {
         val tokenCall = CoroutineCall {
-            val value = refreshAction(store.refreshToken ?: "")
+            val value = refreshAction(store.authCredentials)
             store.saveCredentials(value)
         }
 
@@ -51,7 +51,7 @@ internal class AuthAwareCall<T>(
         call.execute(
             success = { callback.onResponse(this, it) },
             failure = {
-                if (errorChecker.invalidAccessToken(it)) {
+                if (errorChecker.invalidCredentials(it)) {
                     refreshAndExecute(call.clone(), callback)
                 } else {
                     callback.onFailure(this, it)

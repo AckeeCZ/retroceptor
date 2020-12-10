@@ -1,6 +1,5 @@
 package cz.ackee.ackroutine
 
-import cz.ackee.ackroutine.core.DefaultOAuthCredentials
 import cz.ackee.ackroutine.core.OAuthCredentials
 import cz.ackee.ackroutine.core.OAuthStore
 import cz.ackee.retrofitadapter.interceptor.CallableDelegate
@@ -28,17 +27,17 @@ class OAuthManagerTest {
     private val refreshToken = "refresh-token"
     private val expiresIn = 3600L
     private val successResult = "Result"
-    private val credentials = DefaultOAuthCredentials(accessToken, refreshToken, expiresIn)
+    private val credentials = OAuthCredentials(accessToken, refreshToken, expiresIn)
 
     private val unauthorizedException = HttpException(Response.error<Any>(401, ResponseBody.create(null, "error body")))
     private val httpException = HttpException(Response.error<Unit>(404, ResponseBody.create(null, "error body")))
 
     private val store = OAuthStore(MockedSharedPreferences())
 
-    private val refreshAction: suspend (String) -> OAuthCredentials = ::refreshToken
+    private val refreshAction: suspend (OAuthCredentials?) -> OAuthCredentials = ::refreshToken
 
-    private suspend fun refreshToken(token: String): OAuthCredentials {
-        return if (token == refreshToken) credentials else throw unauthorizedException
+    private suspend fun refreshToken(oldCredentials: OAuthCredentials?): OAuthCredentials {
+        return if (oldCredentials?.accessToken == refreshToken) credentials else throw unauthorizedException
     }
 
     private val successCall = object : CallableDelegate<String> {

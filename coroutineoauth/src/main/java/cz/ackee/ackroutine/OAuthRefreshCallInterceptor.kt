@@ -10,7 +10,7 @@ import retrofit2.Call
  * [AckroutineCallAdapter] interceptor that conditionally wraps original [Deferred] future with
  * token check & retrieval logic.
  */
-class OAuthCallInterceptor(private val oAuthManager: OAuthManager) : CallFactoryInterceptor {
+class OAuthRefreshCallInterceptor(private val oAuthManager: OAuthManager) : CallFactoryInterceptor {
 
     override fun intercept(chain: CallChain): Call<*> {
         return if (chain.annotations.any { it is IgnoreAuth }) {

@@ -2,66 +2,46 @@ package cz.ackee.ackroutine
 
 import android.content.Context
 import android.content.SharedPreferences
-import cz.ackee.ackroutine.core.*
-import kotlinx.coroutines.Deferred
-import retrofit2.Call
+import cz.ackee.ackroutine.core.AuthErrorChecker
+import cz.ackee.ackroutine.core.DefaultAuthErrorChecker
+import cz.ackee.ackroutine.core.OAuthCredentials
+import cz.ackee.ackroutine.core.OAuthHeaderInterceptor
+import cz.ackee.ackroutine.core.OAuthStore
 
 /**
- * OAuthManager provides wrapping for Retrofit [Call]s, which automatically handles
- * access token expiration and performs refresh token logic defined with [refreshTokenAction],
- * provided by user.
- * In case of success, new credentials are stored in [OAuthStore].
- *
- * The user may provide fallback for refresh token expiration in [onRefreshTokenFailed].
- *
- * The user may provide custom [ErrorChecker] containing access and refresh token expiration
- * checking logic. Otherwise, [DefaultErrorChecker] is applied.
+ * OAuth implementation of [AuthManager].
  */
 class OAuthManager internal constructor(
-    private val oAuthStore: OAuthStore,
-    private val refreshTokenAction: suspend (String) -> OAuthCredentials,
-    private val onRefreshTokenFailed: (Throwable) -> Unit = {},
-    private val errorChecker: ErrorChecker = DefaultErrorChecker()
+    oAuthStore: OAuthStore,
+    refreshTokenAction: suspend (OAuthCredentials?) -> OAuthCredentials,
+    onRefreshTokenFailed: (Throwable) -> Unit = {},
+    errorChecker: AuthErrorChecker = DefaultAuthErrorChecker()
+) : AuthManager<OAuthCredentials>(
+    authStore = oAuthStore,
+    refreshCredentialsAction = refreshTokenAction,
+    onRefreshCredentialsFailed = onRefreshTokenFailed,
+    errorChecker = errorChecker
 ) {
 
-    constructor(sp: SharedPreferences, refreshTokenAction: suspend (String) -> OAuthCredentials,
-        onRefreshTokenFailed: (Throwable) -> Unit = {}, errorChecker: ErrorChecker = DefaultErrorChecker()) :
-        this(OAuthStore(sp), refreshTokenAction, onRefreshTokenFailed, errorChecker)
+    constructor(
+        sp: SharedPreferences,
+        refreshTokenAction: suspend (OAuthCredentials?) -> OAuthCredentials,
+        onRefreshTokenFailed: (Throwable) -> Unit = {},
+        errorChecker: AuthErrorChecker = DefaultAuthErrorChecker()
+    ) : this(OAuthStore(sp), refreshTokenAction, onRefreshTokenFailed, errorChecker)
 
-    constructor(context: Context, refreshTokenAction: suspend (String) -> OAuthCredentials,
-        onRefreshTokenFailed: (Throwable) -> Unit = {}, errorChecker: ErrorChecker = DefaultErrorChecker()) :
-        this(OAuthStore(context), refreshTokenAction, onRefreshTokenFailed, errorChecker)
+    constructor(
+        context: Context,
+        refreshTokenAction: suspend (OAuthCredentials?) -> OAuthCredentials,
+        onRefreshTokenFailed: (Throwable) -> Unit = {},
+        errorChecker: AuthErrorChecker = DefaultAuthErrorChecker()
+    ) : this(OAuthStore(context), refreshTokenAction, onRefreshTokenFailed, errorChecker)
 
     val accessToken: String?
-        get() = oAuthStore.accessToken
+        get() = authStore.authCredentials?.accessToken
 
     val refreshToken: String?
-        get() = oAuthStore.refreshToken
+        get() = authStore.authCredentials?.refreshToken
 
-    fun saveCredentials(credentials: OAuthCredentials) {
-        oAuthStore.saveCredentials(credentials)
-    }
-
-    fun clearCredentials() {
-        oAuthStore.clearCredentials()
-    }
-
-    fun provideAuthInterceptor() = OAuthInterceptor(oAuthStore)
-
-    fun <T> wrapAuthCheck(call: Call<T>): Call<T> {
-        return AuthAwareCall(call, { refreshAccessToken() }, oAuthStore, errorChecker)
-    }
-
-    private suspend fun refreshAccessToken(): OAuthCredentials {
-        return try {
-            refreshTokenAction(oAuthStore.refreshToken ?: "")
-        } catch (e: Exception) {
-            if (errorChecker.invalidRefreshToken(e)) {
-                clearCredentials()
-                onRefreshTokenFailed(e)
-            }
-
-            throw e
-        }
-    }
+    override fun provideAuthInterceptor() = OAuthHeaderInterceptor(authStore)
 }
