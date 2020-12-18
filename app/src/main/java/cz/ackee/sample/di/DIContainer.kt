@@ -3,7 +3,7 @@ package cz.ackee.sample.di
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import cz.ackee.ackroutine.OAuthManager
-import cz.ackee.ackroutine.OAuthCallInterceptor
+import cz.ackee.ackroutine.OAuthRefreshCallInterceptor
 import cz.ackee.retrofitadapter.AckroutineCallAdapterFactory
 import cz.ackee.sample.App
 import cz.ackee.sample.detail.DetailViewModel
@@ -26,11 +26,11 @@ class DIContainer(app: App) : ViewModelProvider.Factory {
 
     val oAuthManager = OAuthManager(
         context = app,
-        refreshTokenAction = { authApiDescription.refreshAccessToken(it) },
+        refreshTokenAction = { credentials -> authApiDescription.refreshAccessToken(credentials?.refreshToken) },
         onRefreshTokenFailed = { logouter.logout() }
     )
 
-    val callAdapterFactory: AckroutineCallAdapterFactory = AckroutineCallAdapterFactory(OAuthCallInterceptor(oAuthManager))
+    val callAdapterFactory: AckroutineCallAdapterFactory = AckroutineCallAdapterFactory(OAuthRefreshCallInterceptor(oAuthManager))
 
     val logouter = Logouter(app)
 

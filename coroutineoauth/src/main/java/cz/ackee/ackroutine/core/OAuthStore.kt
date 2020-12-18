@@ -6,9 +6,10 @@ import android.content.SharedPreferences
 /**
  * Persistence store of OAuth credentials.
  */
-internal class OAuthStore {
+internal class OAuthStore : AuthStore<OAuthCredentials> {
 
     companion object {
+
         internal const val DEFAULT_SP_NAME = "oauth2"
         internal const val ACCESS_TOKEN_KEY_OLD = "oath2_access_token"
         internal const val REFRESH_TOKEN_KEY_OLD = "oath2_refresh_token"
@@ -26,7 +27,20 @@ internal class OAuthStore {
         get() = sp.getString(REFRESH_TOKEN_KEY, null)
 
     val expiresAt: Long?
-        get() = sp.getLong(EXPIRES_AT_KEY, -1).let { if (it > -1) it else null }
+        get() = sp.getLong(EXPIRES_AT_KEY, -1).takeIf { it > -1 }
+
+    override val authCredentials: OAuthCredentials?
+        get() {
+            return if (accessToken != null || refreshToken != null) {
+                OAuthCredentials(
+                    accessToken = accessToken ?: "",
+                    refreshToken = refreshToken ?: "",
+                    expiresIn = expiresAt
+                )
+            } else {
+                null
+            }
+        }
 
     constructor(context: Context) {
         sp = context.getSharedPreferences(DEFAULT_SP_NAME, Context.MODE_PRIVATE)
@@ -38,7 +52,7 @@ internal class OAuthStore {
         ensureNewKeys()
     }
 
-    fun saveCredentials(credentials: OAuthCredentials) {
+    override fun saveCredentials(credentials: OAuthCredentials) {
         sp.edit()
             .putString(ACCESS_TOKEN_KEY, credentials.accessToken)
             .putString(REFRESH_TOKEN_KEY, credentials.refreshToken)
@@ -48,13 +62,11 @@ internal class OAuthStore {
             .apply()
     }
 
-    fun clearCredentials() {
+    override fun clearCredentials() {
         sp.edit().clear().apply()
     }
 
-    fun tokenExpired(): Boolean {
-        return expiresAt != null && expiresAt!! < System.currentTimeMillis()
-    }
+    fun tokenExpired() = credentialsExpired()
 
     // There were typos in keys, check the keys and migrate them if needed
     private fun ensureNewKeys() {

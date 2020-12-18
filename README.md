@@ -19,21 +19,21 @@ When creating your API service, just provide `AckroutineCallAdapterFactory` with
 When you want to provide multiple interceptors, just pass all of them to single `AckroutineCallAdapterFactory` as illustrated in the example below:
 ```kotlin
     class MyLoggingInterceptor : CallFactoryInterceptor {
-    
+
         override fun intercept(chain: CallChain): Call<*> {
             return chain.proceed(LoggingCall(chain.call))
         }
     }
-    
+
     class LoggingCall<T>(private val call: Call<T>) : CallDelegate<T, T>(call) {
         override fun cloneImpl(): Call<T> = LoggingCall(call.clone())
-    
+
         override fun enqueueImpl(callback: Callback<T>) {
             call.enqueue(object : Callback<T> {
                 override fun onFailure(call: Call<T>, t: Throwable) {
                     // check if error is something you want to log and proceed
                 }
-    
+
                 override fun onResponse(call: Call<T>, response: Response<T>) {
                     callback.onResponse(call, response)
                 }
@@ -56,47 +56,44 @@ When you want to provide multiple interceptors, just pass all of them to single 
 
 ## coroutine-oauth
 ### Description
-- `CoorutineOAuthManager` handles access token expiration and performs token refresh. In case of success, new credentials are stored in `SharedPreferences`. When refresh token is invalid, the optional logic provided in `onRefreshTokenFailed` is performed. With custom `ErrorChecker`, the user may customize access and refresh tokens errors validation
-- `OAuthInterceptor`, which makes use of `OAuthManager` and adds `Authorization` header with access token to OkHttp requests
-- `DefaultOAuthCredentials` is the default implementation of `OAuthCredentials` 
+This library provides easy mechanism for authentication handling, which consists of two basic parts:
+1. Adding authentication metadata such as HTTP headers to all Retrofit requests
+2. Automatic refresh of expired auth credentials such as access tokens
+
+It includes support for OAuth2 flow including refresh token handling. However, you can write custom implementation if you use different type of authentication flow.
 
 ### Dependency
 ```groovy
 implementation 'cz.ackee.ackroutine:coroutine-oauth:x.x.x'
 ```
 
-### Usage
-Working sample is provided in `app` module.
+### Usage - OAuth2
+Working sample with OAuth2 flow is provided in the `app` module.
 
 #### Initialization
-Create a `OAuthManager` typically in API access layer (in our case, ApiInteractor):
-Create necessary supporting components: `OAuthManager` and `AckroutneCallAdapterFactory` which will be provided to Retrofit to create an API Service.
-Simply annotate API Service interface method with `@IgnoreAuth` to skip access token injection into request headers.
+- Create instance of `OAuthManager`
+- Add `AckroutineCallAdapterFactory` with `OAuthRefreshCallInterceptor` to Retrofit call adapter factories
+- Add OkHttp interceptor provided by `oAuthManager.provideAuthInterceptor()` function to inject `Authorization` HTTP header to your requests
+- (optional) Annotate API Service interface method with `@IgnoreAuth` to skip access token injection into request headers for requests that do not require authentication (such as login endpoints).
 ```kotlin
 val oAuthManager = OAuthManager(
         context = app,
         refreshTokenAction = { authApiDescription.refreshAccessToken(it) },
         onRefreshTokenFailed = { logouter.logout() }
     )
-    
+
+val authHeaderInterceptor = oAuthManager.provideAuthInterceptor()
 val callAdapterFactory: AckroutineCallAdapterFactory = AckroutineCallAdapterFactory(OAuthCallInterceptor(oAuthManager))
-```
-Use created API Service in `ApiInteractor` to perform network calls.
-```kotlin
-class ApiInteractor(
-    private val api: ApiDescription,
-    private val oAuthManager: CoroutineOAuthManager
-) {
-    suspend fun fetchData(): List<SampleItem> {
-        return api.fetchData()
-    }
-}
 
-interface ApiDescription {
-
-    @GET("your-resource-url")
-    suspend fun fetchData(): List<SampleItem>
-}
+val okHttpClient = OkHttpClient.Builder()
+    // ...
+    .addNetworkInterceptor(authHeaderInterceptor)
+    .build()
+val retrofit = Retrofit.Builder()
+    // ...
+    .client(okHttpClient)
+    .addCallAdapterFactory(callAdapterFactory)
+    .build()
 ```
 
 #### Storing credentials
@@ -106,15 +103,134 @@ suspend fun login(username: String, password: String): User {
     return with(api.login(ApiUsernameLoginRequest(username, password))) {
         oAuthManager.saveCredentials(credentials)
     }
-}  
+}
 ```
 
-### Logout
+#### Clearing credentials
 After logging out, you may want to remove credentials from the store.
 ```kotlin
 suspend fun logout() {
     authDescription.logout().also {
         oAuthManager.clearCredentials()
     }
+}
+```
+
+#### Error handling
+By default, access token is considered as expired when server returns *HTTP 401 Unauthorized* response. Refresh token is considered as expired when server returns *HTTP 400 Bad Request* or *HTTP 401 Unauthorized* responses. You can modify this behavior with providing custom `AuthErrorChecker` to `OAuthManager`.
+```kotlin
+// Equivalent to invalid access token in OAuth2 flow - called when network request failed
+override fun invalidCredentials(t: Throwable): Boolean {
+    if (t is HttpException) {
+        if (t.code() == HTTP_UNAUTHORIZED) {
+            return true // access token invalid
+        }
+    }
+    return false // access token valid
+}
+
+// Equivalent to invalid refresh toke in OAuth2 flow - called when request for credentials refresh failed
+override fun invalidRefreshCredentials(t: Throwable): Boolean {
+    if (t is HttpException) {
+        when (t.code()) {
+            HTTP_BAD_REQUEST, HTTP_UNAUTHORIZED -> true // refresh token invalid
+            else -> false // refresh token valid
+        }
+    }
+    return false // refresh token valid
+}
+```
+
+### Usage - custom authentication flow
+When using different auth flow than OAuth2, you have to write custom `AuthManager` implementation. Otherwise usage is exactly the same as when using provided `OAuthManager` .
+
+But don't worry, it's easier than it sounds! These are necessary steps for the implementation:
+
+1. Create custom `AuthCredentials`
+2. Implement `AuthStore` for storing your credentials
+3. Create OkHttp `Interceptor` for injecting authorization metadata to network requests
+4. Create your custom `AuthManager<C : AuthCredentials>`
+
+#### AuthCredentials
+Simple interface for auth credentials model entity. If your credentials contains information about time of expiration, you should override `areExpired()` function.
+
+Example:
+```kotlin
+data class OAuthCredentials(
+    val accessToken: String,
+    val refreshToken: String,
+    val expiresIn: Long? = null
+) : AuthCredentials {
+
+    override fun areExpired(): Boolean {
+        return expiresIn?.let { expiration ->
+            System.currentTimeMillis() >= expiration
+        } ?: false
+    }
+}
+```
+
+#### AuthStore
+Library doesn't know how to serialize and properly store your newly created `AuthCredentials`, that's why you have to create custom `AuthStore`. You can use `SharedPreferences`, local database or any other persistency solution that you prefer.
+
+Simplified example:
+```kotlin
+class OAuthStore : AuthStore<OAuthCredentials> {
+
+    private val sp: SharedPreferences
+
+    override val authCredentials: OAuthCredentials?
+        get() = sp.getString("credentials", null)?.deserialize()
+
+    override fun saveCredentials(credentials: OAuthCredentials) {
+        sp.edit {
+            putString("credentials", credentials.serialize())
+        }
+    }
+
+    override fun clearCredentials() {
+        sp.edit().clear().apply()
+    }
+```
+
+#### OkHttp Authentication Interceptor
+Custom interceptor that adds authentication metadata to your requests.
+
+Example:
+```kotlin
+class OAuthHeaderInterceptor (private val authStore: AuthStore<OAuthCredentials>) : Interceptor {
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val originalRequest = chain.request()
+        val builder = originalRequest.newBuilder()
+
+        val accessToken = authStore.authCredentials?.accessToken?.takeIf { it.isNotBlank() }
+        accessToken?.let { token ->
+            builder.addHeader("Authorization", "Bearer $token")
+        }
+
+        return chain.proceed(builder.build())
+    }
+}
+```
+
+#### AuthManager
+Wraps all concepts mentioned above to single class that you'll interact with. All you need to do is initialize base `AuthManager` with all values and return your OkHttp interceptor from `provideAuthInterceptor()` function.
+
+Simplified example:
+```kotlin
+class OAuthManager internal constructor(
+    oAuthStore: OAuthStore,
+    refreshCredentialsAction: suspend (OAuthCredentials?) -> OAuthCredentials,
+    onRefreshCredentialsFailed: (Throwable) -> Unit = {},
+    errorChecker: AuthErrorChecker = DefaultAuthErrorChecker()
+) : AuthManager<OAuthCredentials>(
+    authStore = oAuthStore,
+    refreshCredentialsAction = refreshCredentialsAction,
+    onRefreshCredentialsFailed = onRefreshCredentialsFailed,
+    errorChecker = errorChecker
+) {
+
+    override fun provideAuthInterceptor() = OAuthHeaderInterceptor(authStore)
 }
 ```

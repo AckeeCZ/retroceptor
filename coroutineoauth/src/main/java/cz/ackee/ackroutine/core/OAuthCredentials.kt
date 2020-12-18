@@ -1,11 +1,17 @@
 package cz.ackee.ackroutine.core
 
 /**
- * Model for OAuth credentials.
+ * Default OAuth implementation of [AuthCredentials].
  */
-interface OAuthCredentials {
+data class OAuthCredentials(
+    val accessToken: String,
+    val refreshToken: String,
+    val expiresIn: Long? = null
+) : AuthCredentials {
 
-    val accessToken: String
-    val refreshToken: String
-    val expiresIn: Long?
+    override fun areExpired(): Boolean {
+        return expiresIn?.let { expiration ->
+            System.currentTimeMillis() >= expiration
+        } ?: false
+    }
 }

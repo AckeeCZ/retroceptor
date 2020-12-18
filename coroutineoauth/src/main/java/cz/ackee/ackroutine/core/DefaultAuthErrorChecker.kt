@@ -6,9 +6,9 @@ import java.net.HttpURLConnection
 /**
  * Default error checker that checks for 401 for expired access token and 401 + 400 for bad refresh of token
  */
-class DefaultErrorChecker : ErrorChecker {
+class DefaultAuthErrorChecker : AuthErrorChecker {
 
-    override fun invalidAccessToken(t: Throwable): Boolean {
+    override fun invalidCredentials(t: Throwable): Boolean {
         if (t is HttpException) {
             if (t.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
                 return true
@@ -17,7 +17,7 @@ class DefaultErrorChecker : ErrorChecker {
         return false
     }
 
-    override fun invalidRefreshToken(t: Throwable): Boolean {
+    override fun invalidRefreshCredentials(t: Throwable): Boolean {
         if (t is HttpException) {
             if (t.code() == HttpURLConnection.HTTP_BAD_REQUEST || t.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
                 return true

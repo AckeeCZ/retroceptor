@@ -2,7 +2,7 @@ package cz.ackee.sample.detail
 
 import androidx.lifecycle.ViewModel
 import cz.ackee.ackroutine.OAuthManager
-import cz.ackee.ackroutine.core.DefaultOAuthCredentials
+import cz.ackee.ackroutine.core.OAuthCredentials
 import cz.ackee.sample.interactor.ApiInteractor
 import cz.ackee.sample.model.Logouter
 import cz.ackee.sample.model.SampleItem
@@ -48,11 +48,11 @@ class DetailViewModel(
     }
 
     fun invalidateAccessToken() {
-        oAuthManager.saveCredentials(DefaultOAuthCredentials("invalid-access-token", oAuthManager.refreshToken ?: "", 15))
+        oAuthManager.saveCredentials(OAuthCredentials("invalid-access-token", oAuthManager.refreshToken ?: "", 15))
     }
 
     fun invalidateRefreshToken() {
-        oAuthManager.saveCredentials(DefaultOAuthCredentials(oAuthManager.accessToken ?: "", "invalid-refresh-token", 15))
+        oAuthManager.saveCredentials(OAuthCredentials(oAuthManager.accessToken ?: "", "invalid-refresh-token", 15))
     }
 
     fun logout() {
