@@ -86,14 +86,14 @@ val authHeaderInterceptor = oAuthManager.provideAuthInterceptor()
 val callAdapterFactory: AckroutineCallAdapterFactory = AckroutineCallAdapterFactory(OAuthCallInterceptor(oAuthManager))
 
 val okHttpClient = OkHttpClient.Builder()
-	// ...
-	.addNetworkInterceptor(authHeaderInterceptor)
-	.build()
+    // ...
+    .addNetworkInterceptor(authHeaderInterceptor)
+    .build()
 val retrofit = Retrofit.Builder()
-	// ...
-	.client(okHttpClient)
-	.addCallAdapterFactory(callAdapterFactory)
-	.build()
+    // ...
+    .client(okHttpClient)
+    .addCallAdapterFactory(callAdapterFactory)
+    .build()
 ```
 
 #### Storing credentials
@@ -121,10 +121,10 @@ By default, access token is considered as expired when server returns *HTTP 401 
 ```kotlin
 // Equivalent to invalid access token in OAuth2 flow - called when network request failed
 override fun invalidCredentials(t: Throwable): Boolean {
-	if (t is HttpException) {
-		if (t.code() == HTTP_UNAUTHORIZED) {
-			return true // access token invalid
-		}
+    if (t is HttpException) {
+        if (t.code() == HTTP_UNAUTHORIZED) {
+            return true // access token invalid
+        }
     }
     return false // access token valid
 }
@@ -132,10 +132,10 @@ override fun invalidCredentials(t: Throwable): Boolean {
 // Equivalent to invalid refresh toke in OAuth2 flow - called when request for credentials refresh failed
 override fun invalidRefreshCredentials(t: Throwable): Boolean {
     if (t is HttpException) {
-	    when (t.code()) {
-		    HTTP_BAD_REQUEST, HTTP_UNAUTHORIZED -> true // refresh token invalid
-		    else -> false // refresh token valid
-		}
+        when (t.code()) {
+            HTTP_BAD_REQUEST, HTTP_UNAUTHORIZED -> true // refresh token invalid
+            else -> false // refresh token valid
+        }
     }
     return false // refresh token valid
 }
@@ -158,15 +158,15 @@ Example:
 ```kotlin
 data class OAuthCredentials(
     val accessToken: String,
-	val refreshToken: String,
-	val expiresIn: Long? = null
+    val refreshToken: String,
+    val expiresIn: Long? = null
 ) : AuthCredentials {
 
     override fun areExpired(): Boolean {
         return expiresIn?.let { expiration ->
-	        System.currentTimeMillis() >= expiration
+            System.currentTimeMillis() >= expiration
         } ?: false
-	}
+    }
 }
 ```
 
@@ -177,20 +177,20 @@ Simplified example:
 ```kotlin
 class OAuthStore : AuthStore<OAuthCredentials> {
 
-	private val sp: SharedPreferences
+    private val sp: SharedPreferences
 
-	override val authCredentials: OAuthCredentials?
-		get() = sp.getString("credentials", null)?.deserialize()
+    override val authCredentials: OAuthCredentials?
+        get() = sp.getString("credentials", null)?.deserialize()
 
-	override fun saveCredentials(credentials: OAuthCredentials) {
-		sp.edit {
-			putString("credentials", credentials.serialize())
-		}
-	}
+    override fun saveCredentials(credentials: OAuthCredentials) {
+        sp.edit {
+            putString("credentials", credentials.serialize())
+        }
+    }
 
-	override fun clearCredentials() {
-		sp.edit().clear().apply()
-	}
+    override fun clearCredentials() {
+        sp.edit().clear().apply()
+    }
 ```
 
 #### OkHttp Authentication Interceptor
@@ -205,9 +205,9 @@ class OAuthHeaderInterceptor (private val authStore: AuthStore<OAuthCredentials>
         val builder = originalRequest.newBuilder()
 
         val accessToken = authStore.authCredentials?.accessToken?.takeIf { it.isNotBlank() }
-		accessToken?.let { token ->
-			builder.addHeader("Authorization", "Bearer $token")
-		}
+        accessToken?.let { token ->
+            builder.addHeader("Authorization", "Bearer $token")
+        }
 
         return chain.proceed(builder.build())
     }
@@ -221,16 +221,16 @@ Simplified example:
 ```kotlin
 class OAuthManager internal constructor(
     oAuthStore: OAuthStore,
-	refreshCredentialsAction: suspend (OAuthCredentials?) -> OAuthCredentials,
-	onRefreshCredentialsFailed: (Throwable) -> Unit = {},
-	errorChecker: AuthErrorChecker = DefaultAuthErrorChecker()
+    refreshCredentialsAction: suspend (OAuthCredentials?) -> OAuthCredentials,
+    onRefreshCredentialsFailed: (Throwable) -> Unit = {},
+    errorChecker: AuthErrorChecker = DefaultAuthErrorChecker()
 ) : AuthManager<OAuthCredentials>(
     authStore = oAuthStore,
-	refreshCredentialsAction = refreshCredentialsAction,
-	onRefreshCredentialsFailed = onRefreshCredentialsFailed,
-	errorChecker = errorChecker
+    refreshCredentialsAction = refreshCredentialsAction,
+    onRefreshCredentialsFailed = onRefreshCredentialsFailed,
+    errorChecker = errorChecker
 ) {
 
-	override fun provideAuthInterceptor() = OAuthHeaderInterceptor(authStore)
+    override fun provideAuthInterceptor() = OAuthHeaderInterceptor(authStore)
 }
 ```
