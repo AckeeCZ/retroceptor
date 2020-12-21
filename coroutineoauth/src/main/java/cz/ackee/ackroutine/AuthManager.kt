@@ -25,6 +25,8 @@ abstract class AuthManager<C : AuthCredentials>(
     protected val errorChecker: AuthErrorChecker = DefaultAuthErrorChecker()
 ) {
 
+    private val singleCallHandler = SingleCallHandler<C>()
+
     /**
      * Latest auth credentials.
      */
@@ -50,7 +52,7 @@ abstract class AuthManager<C : AuthCredentials>(
      * Provides internal dependencies for credential refresh interceptor.
      */
     fun <T> wrapAuthCheck(call: Call<T>): Call<T> {
-        return AuthAwareCall(call, { refreshAuthCredentials() }, authStore, errorChecker)
+        return AuthAwareCall(call, { singleCallHandler.callSingle { refreshAuthCredentials() } }, authStore, errorChecker)
     }
 
     /**
