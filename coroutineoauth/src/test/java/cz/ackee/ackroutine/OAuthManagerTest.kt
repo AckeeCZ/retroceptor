@@ -37,7 +37,7 @@ class OAuthManagerTest {
     private val refreshAction: suspend (OAuthCredentials?) -> OAuthCredentials = ::refreshToken
 
     private suspend fun refreshToken(oldCredentials: OAuthCredentials?): OAuthCredentials {
-        return if (oldCredentials?.accessToken == refreshToken) credentials else throw unauthorizedException
+        return if (oldCredentials?.accessToken == accessToken) credentials else throw unauthorizedException
     }
 
     private val successCall = object : CallableDelegate<String> {
