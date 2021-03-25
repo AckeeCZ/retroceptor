@@ -141,6 +141,8 @@ override fun invalidRefreshCredentials(t: Throwable): Boolean {
 }
 ```
 
+Please note that when you use custom `CallFactoryInterceptor` that maps exceptions on network layer, it should be added *before* your `AuthInterceptor`. In this case you need to provide custom `AuthErrorChecker` which will receive mapped exceptions.
+
 ### Usage - custom authentication flow
 When using different auth flow than OAuth2, you have to write custom `AuthManager` implementation. Otherwise usage is exactly the same as when using provided `OAuthManager` .
 
