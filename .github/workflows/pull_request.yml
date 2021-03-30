@@ -13,6 +13,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 20 # Fetch 20 last commits, should be enough for changelogs
+      - name: Fetch Git tags
+        run: |
+          git fetch --prune --unshallow --tags
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
@@ -25,3 +30,31 @@ jobs:
         run: ./gradlew assemble
       - name: Test
         run: ./gradlew test
+      - name: Prepare Slack notification message
+        id: prepare_slack_message
+        run: |
+          LIB_PROP_FILE="lib.properties"
+          VERSION_NAME=`cat $LIB_PROP_FILE | grep VERSION_NAME | cut -d = -f 2`
+          SITE_URL=`grep SITE_URL < $LIB_PROP_FILE | cut -d = -f 2`
+          LIB_NAME=`echo $SITE_URL | cut -d / -f 5`
+          GIT_CHANGELOG=`git log $(git describe --tags --abbrev=0)..HEAD --oneline --no-decorate | cut -d ' ' -f 2- | tail -n +3`
+          export SLACK_MSG_TITLE="$LIB_NAME $VERSION_NAME released :tada:"
+          export SLACK_MSG="Changes:
+          $GIT_CHANGELOG
+
+          See more at $SITE_URL."
+          SLACK_MSG="${SLACK_MSG//'%'/'%25'}"
+          SLACK_MSG="${SLACK_MSG//$'\n'/'%0A'}"
+          SLACK_MSG="${SLACK_MSG//$'\r'/'%0D'}"
+          echo "::set-output name=SLACK_MSG::$(echo "$SLACK_MSG")"
+          echo "::set-output name=SLACK_MSG_TITLE::$(echo "$SLACK_MSG_TITLE")"
+      - name: Send Slack notification # TODO move to repository upload task
+        uses: rtCamp/action-slack-notify@v2
+        if: ${{ job.status == 'success' }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.ANDROID_OSS_NOTIFICATION_WEBHOOK }}
+          SLACK_USERNAME: 'ackee-github'
+          SLACK_ICON_EMOJI: ':octocat:'
+          SLACK_TITLE: ${{ steps.prepare_slack_message.outputs.SLACK_MSG_TITLE }}
+          SLACK_MESSAGE: ${{ steps.prepare_slack_message.outputs.SLACK_MSG }}
+          MSG_MINIMAL: true
