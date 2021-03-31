@@ -13,11 +13,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 20 # Fetch 20 last commits, should be enough for changelogs
-      - name: Fetch Git tags
-        run: |
-          git fetch --prune --unshallow --tags
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
