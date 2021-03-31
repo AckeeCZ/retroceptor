@@ -1,4 +1,4 @@
-name: Java CI
+name: Bintray deploy # TODO migrate to Maven Central
 
 on:
   push:
@@ -29,3 +29,31 @@ jobs:
         env:
           bintrayUsername: ${{ secrets.BINTRAY_NAME }}
           bintrayApiKey: ${{ secrets.BINTRAY_API_KEY }}
+      - name: Prepare Slack notification message
+        id: prepare_slack_message
+        run: |
+          LIB_PROP_FILE="lib.properties"
+          VERSION_NAME=`cat $LIB_PROP_FILE | grep VERSION_NAME | cut -d = -f 2`
+          SITE_URL=`cat $LIB_PROP_FILE | grep SITE_URL | cut -d = -f 2`
+          LIB_NAME=`echo $SITE_URL | cut -d / -f 5`
+          GIT_CHANGELOG=`git log $(git describe --tags --abbrev=0)..HEAD --oneline --no-decorate | cut -d ' ' -f 2- | tail -n +3`
+          export SLACK_MSG_TITLE="$LIB_NAME $VERSION_NAME released :tada:"
+          export SLACK_MSG="Changes:
+          $GIT_CHANGELOG
+
+          See more at $SITE_URL."
+          SLACK_MSG="${SLACK_MSG//'%'/'%25'}"
+          SLACK_MSG="${SLACK_MSG//$'\n'/'%0A'}"
+          SLACK_MSG="${SLACK_MSG//$'\r'/'%0D'}"
+          echo "::set-output name=SLACK_MSG::$(echo "$SLACK_MSG")"
+          echo "::set-output name=SLACK_MSG_TITLE::$(echo "$SLACK_MSG_TITLE")"
+      - name: Send Slack notification
+        uses: rtCamp/action-slack-notify@v2
+        if: ${{ job.status == 'success' }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.ANDROID_OSS_NOTIFICATION_WEBHOOK }}
+          SLACK_USERNAME: 'github-snitch'
+          SLACK_ICON_EMOJI: ':octocat:'
+          SLACK_TITLE: ${{ steps.prepare_slack_message.outputs.SLACK_MSG_TITLE }}
+          SLACK_MESSAGE: ${{ steps.prepare_slack_message.outputs.SLACK_MSG }}
+          MSG_MINIMAL: true
