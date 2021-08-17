@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/AckeeCZ/ackroutine-adapter.svg?branch=master)](https://travis-ci.org/AckeeCZ/ackroutine-adapter) [ ![Download](https://api.bintray.com/packages/ackeecz/ackroutine-adapter/coroutine-adapter/images/download.svg) ](https://bintray.com/ackeecz/ackroutine-adapter/coroutine-adapter/_latestVersion)
+[ ![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.ackeecz/ackroutine-adapter/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.ackeecz/ackroutine-adapter)
 
 # Coroutine OAuth Android Library
 Simple coroutine extension, which makes use of Retrofit2 internal `Call<T>` to suspending function conversion to add support for OAuth and custom request modifiers.
@@ -9,7 +9,7 @@ Simple coroutine extension, which makes use of Retrofit2 internal `Call<T>` to s
 
 ### Dependency
 ```groovy
-implementation 'cz.ackee.ackroutine:coroutine-adapter:x.x.x'
+implementation 'io.github.ackeecz:coroutine-adapter:x.x.x'
 ```
 
 ### Usage
@@ -64,7 +64,7 @@ It includes support for OAuth2 flow including refresh token handling. However, y
 
 ### Dependency
 ```groovy
-implementation 'cz.ackee.ackroutine:coroutine-oauth:x.x.x'
+implementation 'io.github.ackeecz:coroutine-oauth:x.x.x'
 ```
 
 ### Usage - OAuth2

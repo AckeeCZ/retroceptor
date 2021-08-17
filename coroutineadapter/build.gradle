@@ -29,12 +29,10 @@ dependencies {
 }
 
 ext {
-    bintrayName = 'coroutine-adapter'
-    publishedArtifactId = 'coroutine-adapter'
-
-    libraryName = 'Coroutine Retrofit adapter'
-    libraryDescription = 'General purpose Retrofit adapter that allows intercepting calls'
+    PUBLISH_ARTIFACT_ID = 'coroutine-adapter'
+    POM_DESCRIPTION = 'General purpose Retrofit adapter that allows intercepting calls'
 }
 
-apply from: rootProject.file('gradle/bintray/install.gradle')
-apply from: rootProject.file('gradle/bintray/bintray.gradle')
+apply from: "${rootProject.projectDir}/gradle/mavencentral/publish.gradle"
+
+// TODO Continue with 6. $rootDir/gradle/bintray/ folder.
