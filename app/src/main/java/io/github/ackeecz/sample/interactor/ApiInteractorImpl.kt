@@ -1,8 +1,8 @@
-package io.ackeecz.sample.interactor
+package io.github.ackeecz.sample.interactor
 
-import io.ackeecz.sample.model.SampleItem
-import io.ackeecz.sample.model.rest.ApiDescription
-import io.ackeecz.sample.model.rest.AuthApiDescription
+import io.github.ackeecz.sample.model.SampleItem
+import io.github.ackeecz.sample.model.rest.ApiDescription
+import io.github.ackeecz.sample.model.rest.AuthApiDescription
 import io.github.ackeecz.retroceptor.OAuthManager
 import io.github.ackeecz.retroceptor.core.OAuthCredentials
 

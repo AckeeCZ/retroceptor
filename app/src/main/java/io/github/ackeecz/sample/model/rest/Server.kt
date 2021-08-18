@@ -1,4 +1,4 @@
-package io.ackeecz.sample.model.rest
+package io.github.ackeecz.sample.model.rest
 
 import android.content.Context
 import android.util.Log

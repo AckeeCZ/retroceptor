@@ -1,10 +1,10 @@
-package io.ackeecz.sample.detail
+package io.github.ackeecz.sample.detail
 
 import androidx.lifecycle.ViewModel
-import io.ackeecz.sample.interactor.ApiInteractor
-import io.ackeecz.sample.model.Logouter
-import io.ackeecz.sample.model.SampleItem
-import io.ackeecz.sample.model.State
+import io.github.ackeecz.sample.interactor.ApiInteractor
+import io.github.ackeecz.sample.model.Logouter
+import io.github.ackeecz.sample.model.SampleItem
+import io.github.ackeecz.sample.model.State
 import io.github.ackeecz.retroceptor.OAuthManager
 import io.github.ackeecz.retroceptor.core.OAuthCredentials
 import kotlinx.coroutines.CoroutineScope

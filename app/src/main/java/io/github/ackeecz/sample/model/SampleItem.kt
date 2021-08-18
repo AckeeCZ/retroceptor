@@ -1,4 +1,4 @@
-package io.ackeecz.sample.model
+package io.github.ackeecz.sample.model
 
 /**
  * Sample item

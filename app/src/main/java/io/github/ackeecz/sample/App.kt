@@ -1,9 +1,9 @@
-package io.ackeecz.sample
+package io.github.ackeecz.sample
 
 import android.app.Application
 import com.facebook.stetho.Stetho
-import io.ackeecz.sample.di.DIContainer
-import io.ackeecz.sample.model.rest.Server
+import io.github.ackeecz.sample.di.DIContainer
+import io.github.ackeecz.sample.model.rest.Server
 
 /**
  * Application class

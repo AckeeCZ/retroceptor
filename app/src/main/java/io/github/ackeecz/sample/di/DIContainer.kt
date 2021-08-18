@@ -1,15 +1,15 @@
-package io.ackeecz.sample.di
+package io.github.ackeecz.sample.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.ackeecz.sample.App
-import io.ackeecz.sample.detail.DetailViewModel
-import io.ackeecz.sample.interactor.ApiInteractor
-import io.ackeecz.sample.interactor.ApiInteractorImpl
-import io.ackeecz.sample.login.LoginViewModel
-import io.ackeecz.sample.model.Logouter
-import io.ackeecz.sample.model.rest.ApiDescription
-import io.ackeecz.sample.model.rest.AuthApiDescription
+import io.github.ackeecz.sample.App
+import io.github.ackeecz.sample.detail.DetailViewModel
+import io.github.ackeecz.sample.interactor.ApiInteractor
+import io.github.ackeecz.sample.interactor.ApiInteractorImpl
+import io.github.ackeecz.sample.login.LoginViewModel
+import io.github.ackeecz.sample.model.Logouter
+import io.github.ackeecz.sample.model.rest.ApiDescription
+import io.github.ackeecz.sample.model.rest.AuthApiDescription
 import io.appflate.restmock.RESTMockServer
 import io.github.ackeecz.retroceptor.OAuthManager
 import io.github.ackeecz.retroceptor.OAuthRefreshCallInterceptor

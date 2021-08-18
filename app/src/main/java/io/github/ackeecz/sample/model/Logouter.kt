@@ -1,8 +1,8 @@
-package io.ackeecz.sample.model
+package io.github.ackeecz.sample.model
 
 import android.content.Context
 import android.content.Intent
-import io.ackeecz.sample.login.LoginActivity
+import io.github.ackeecz.sample.login.LoginActivity
 
 /**
  * Logouter that performs all steps for logout

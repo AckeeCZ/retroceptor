@@ -1,6 +1,6 @@
-package io.ackeecz.sample.model.rest
+package io.github.ackeecz.sample.model.rest
 
-import io.ackeecz.sample.model.SampleItem
+import io.github.ackeecz.sample.model.SampleItem
 import retrofit2.http.GET
 
 /**

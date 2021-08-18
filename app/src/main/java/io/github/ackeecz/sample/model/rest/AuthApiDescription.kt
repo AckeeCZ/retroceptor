@@ -1,4 +1,4 @@
-package io.ackeecz.sample.model.rest
+package io.github.ackeecz.sample.model.rest
 
 import io.github.ackeecz.retroceptor.IgnoreAuth
 import io.github.ackeecz.retroceptor.core.OAuthCredentials

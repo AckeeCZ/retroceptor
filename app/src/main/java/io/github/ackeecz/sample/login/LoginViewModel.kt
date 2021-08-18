@@ -1,8 +1,8 @@
-package io.ackeecz.sample.login
+package io.github.ackeecz.sample.login
 
 import androidx.lifecycle.ViewModel
-import io.ackeecz.sample.interactor.ApiInteractor
-import io.ackeecz.sample.model.State
+import io.github.ackeecz.sample.interactor.ApiInteractor
+import io.github.ackeecz.sample.model.State
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

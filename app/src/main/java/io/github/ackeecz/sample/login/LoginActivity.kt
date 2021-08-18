@@ -1,14 +1,14 @@
-package io.ackeecz.sample.login
+package io.github.ackeecz.sample.login
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
-import io.ackeecz.sample.App
-import io.ackeecz.sample.R
-import io.ackeecz.sample.detail.DetailActivity
-import io.ackeecz.sample.model.State
+import io.github.ackeecz.sample.App
+import io.github.ackeecz.sample.R
+import io.github.ackeecz.sample.detail.DetailActivity
+import io.github.ackeecz.sample.model.State
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

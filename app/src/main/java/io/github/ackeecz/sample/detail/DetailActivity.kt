@@ -1,13 +1,13 @@
-package io.ackeecz.sample.detail
+package io.github.ackeecz.sample.detail
 
 import android.app.ListActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
-import io.ackeecz.sample.App
-import io.ackeecz.sample.model.SampleItem
-import io.ackeecz.sample.model.State
+import io.github.ackeecz.sample.App
+import io.github.ackeecz.sample.model.SampleItem
+import io.github.ackeecz.sample.model.State
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
