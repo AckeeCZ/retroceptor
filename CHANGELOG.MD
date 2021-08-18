@@ -11,3 +11,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ‼️ Important ‼️ groupId has changed. New groupId is `io.github.ackeecz`.
 - Package name changed as well from `cz.ackee.ackroutine` to `io.github.ackeecz.retroceptor`
 - `AckroutineCallAdapter` is renamed to `RetroceptorCallAdapter`, `AckroutineCallAdapterFactory` is renamed to `RetroceptorCallAdapterFactory`
+- `OAuthManager` is now `open`

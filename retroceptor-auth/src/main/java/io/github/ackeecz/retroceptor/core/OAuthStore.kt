@@ -6,7 +6,7 @@ import android.content.SharedPreferences
 /**
  * Persistence store of OAuth credentials.
  */
-internal class OAuthStore : AuthStore<OAuthCredentials> {
+class OAuthStore : AuthStore<OAuthCredentials> {
 
     companion object {
 

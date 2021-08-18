@@ -7,12 +7,13 @@ import io.github.ackeecz.retroceptor.core.DefaultAuthErrorChecker
 import io.github.ackeecz.retroceptor.core.OAuthCredentials
 import io.github.ackeecz.retroceptor.core.OAuthHeaderInterceptor
 import io.github.ackeecz.retroceptor.core.OAuthStore
+import okhttp3.Interceptor
 
 /**
  * OAuth implementation of [AuthManager].
  */
-class OAuthManager internal constructor(
-    oAuthStore: OAuthStore,
+open class OAuthManager internal constructor(
+    protected val oAuthStore: OAuthStore,
     refreshTokenAction: suspend (OAuthCredentials?) -> OAuthCredentials,
     onRefreshTokenFailed: (Throwable) -> Unit = {},
     errorChecker: AuthErrorChecker = DefaultAuthErrorChecker()
@@ -43,5 +44,5 @@ class OAuthManager internal constructor(
     val refreshToken: String?
         get() = authStore.authCredentials?.refreshToken
 
-    override fun provideAuthInterceptor() = OAuthHeaderInterceptor(authStore)
+    override fun provideAuthInterceptor(): Interceptor = OAuthHeaderInterceptor(authStore)
 }
