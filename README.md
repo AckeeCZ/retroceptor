@@ -1,22 +1,22 @@
-[![Build Status](https://travis-ci.org/AckeeCZ/ackroutine-adapter.svg?branch=master)](https://travis-ci.org/AckeeCZ/ackroutine-adapter) [ ![Download](https://api.bintray.com/packages/ackeecz/ackroutine-adapter/coroutine-adapter/images/download.svg) ](https://bintray.com/ackeecz/ackroutine-adapter/coroutine-adapter/_latestVersion)
+# Retroceptor Android Library
+Simple library that allows you to define custom network interceptors on Retrofit layer with support for returning `Deferred` types, so you can use Kotlin `suspend` functions for making your requests.
 
-# Coroutine OAuth Android Library
-Simple coroutine extension, which makes use of Retrofit2 internal `Call<T>` to suspending function conversion to add support for OAuth and custom request modifiers.
+## retroceptor-core
+[ ![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.ackeecz/retroceptor-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.ackeecz/retroceptor-core)
 
-## coroutine-adapter
 ### Description
 - Provides a chainable abstraction with `CallFactoryInterceptor` allowing you to define custom interceptors to alter network requests behaviour.
 
 ### Dependency
 ```groovy
-implementation 'cz.ackee.ackroutine:coroutine-adapter:x.x.x'
+implementation 'io.github.ackeecz:retroceptor-core:x.x.x'
 ```
 
 ### Usage
-When creating your API service, just provide `AckroutineCallAdapterFactory` with custom defined `CallChainInterceptor`s to Retrofit builder.
+When creating your API service, just provide `RetroceptorCallAdapterFactory` with custom defined `CallChainInterceptor`s to Retrofit builder.
 
-**Caution!** Do not add multiple `AckroutineCallAdapterFactory` instances, because only the first one will be used due to Retrofit implementation.
-When you want to provide multiple interceptors, just pass all of them to single `AckroutineCallAdapterFactory` as illustrated in the example below:
+**Caution!** Do not add multiple `RetroceptorCallAdapterFactory` instances, because only the first one will be used due to Retrofit implementation.
+When you want to provide multiple interceptors, just pass all of them to single `RetroceptorCallAdapterFactory` as illustrated in the example below:
 ```kotlin
     class MyLoggingInterceptor : CallFactoryInterceptor {
 
@@ -44,7 +44,7 @@ When you want to provide multiple interceptors, just pass all of them to single 
 
     val apiDescription = retrofitBuilder
         .addCallAdapterFactory(
-            AckroutineCallAdapterFactory(
+            RetroceptorCallAdapterFactory(
                 MyLoggingInterceptor(),
                 AnotherCustomInterceptor()
             )
@@ -54,7 +54,8 @@ When you want to provide multiple interceptors, just pass all of them to single 
 ```
 :tada:
 
-## coroutine-oauth
+## retroceptor-auth
+[ ![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.ackeecz/retroceptor-auth/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.ackeecz/retroceptor-auth)
 ### Description
 This library provides easy mechanism for authentication handling, which consists of two basic parts:
 1. Adding authentication metadata such as HTTP headers to all Retrofit requests
@@ -64,7 +65,7 @@ It includes support for OAuth2 flow including refresh token handling. However, y
 
 ### Dependency
 ```groovy
-implementation 'cz.ackee.ackroutine:coroutine-oauth:x.x.x'
+implementation 'io.github.ackeecz:retroceptor-auth:x.x.x'
 ```
 
 ### Usage - OAuth2
@@ -72,7 +73,7 @@ Working sample with OAuth2 flow is provided in the `app` module.
 
 #### Initialization
 - Create instance of `OAuthManager`
-- Add `AckroutineCallAdapterFactory` with `OAuthRefreshCallInterceptor` to Retrofit call adapter factories
+- Add `RetroceptorCallAdapterFactory` with `OAuthRefreshCallInterceptor` to Retrofit call adapter factories
 - Add OkHttp interceptor provided by `oAuthManager.provideAuthInterceptor()` function to inject `Authorization` HTTP header to your requests
 - (optional) Annotate API Service interface method with `@IgnoreAuth` to skip access token injection into request headers for requests that do not require authentication (such as login endpoints).
 ```kotlin
@@ -83,7 +84,7 @@ val oAuthManager = OAuthManager(
     )
 
 val authHeaderInterceptor = oAuthManager.provideAuthInterceptor()
-val callAdapterFactory: AckroutineCallAdapterFactory = AckroutineCallAdapterFactory(OAuthCallInterceptor(oAuthManager))
+val callAdapterFactory: RetroceptorCallAdapterFactory = RetroceptorCallAdapterFactory(OAuthCallInterceptor(oAuthManager))
 
 val okHttpClient = OkHttpClient.Builder()
     // ...

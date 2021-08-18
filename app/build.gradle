@@ -41,8 +41,8 @@ ext {
 }
 
 dependencies {
-    implementation project(':coroutineoauth')
-    implementation project(':coroutineadapter')
+    implementation project(':retroceptor-auth')
+    implementation project(':retroceptor-core')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
@@ -51,7 +51,6 @@ dependencies {
 
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-moshi:$retrofitVersion"
-
 
     implementation "com.github.andrzejchm.RESTMock:android:$restMockVersion"
     implementation "com.facebook.stetho:stetho:$stethoVersion"

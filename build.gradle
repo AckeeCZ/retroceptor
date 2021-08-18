@@ -1,15 +1,15 @@
 buildscript {
-    ext.kotlin_version = '1.4.21'
+    ext.kotlin_version = '1.5.21'
 
     repositories {
         google()
         jcenter()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.1.1"
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3"
-        classpath "com.github.dcendents:android-maven-gradle-plugin:2.0"
+        classpath "com.android.tools.build:gradle:4.1.3"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.4.32"
+        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0'
     }
 }
 
@@ -32,14 +32,16 @@ ext.libProperties = new Properties()
 ext.libProperties.load(file("${rootDir}/lib.properties").newReader())
 
 ext {
-    appcompatVersion = '1.2.0'
+    appcompatVersion = '1.3.1'
     retrofitVersion = '2.9.0'
-    coroutinesVersion = '1.4.2'
-    junitVersion = '4.13.1'
-    mockitoVersion = '3.6.28'
+    coroutinesVersion = '1.5.0'
+    junitVersion = '4.13.2'
+    mockitoVersion = '3.11.2'
 }
 
 //plugin doesn't understand well with kotlin documentation so disable javadoc generation
 subprojects {
     tasks.withType(Javadoc).all { enabled = false }
 }
+
+apply plugin: 'io.codearte.nexus-staging'
