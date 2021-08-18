@@ -1,7 +1,7 @@
 package io.ackeecz.sample.model.rest
 
-import io.github.ackeecz.ackroutine.IgnoreAuth
-import io.github.ackeecz.ackroutine.core.OAuthCredentials
+import io.github.ackeecz.retroceptor.IgnoreAuth
+import io.github.ackeecz.retroceptor.core.OAuthCredentials
 import retrofit2.http.POST
 import retrofit2.http.Query
 

@@ -1,0 +1,46 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 30
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode = libProperties['VERSION_CODE']
+        versionName libProperties['VERSION_NAME']
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // needed for different module name and artifact id name
+        archivesBaseName = "retroceptor-auth"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/atomicfu.kotlin_module'
+    }
+}
+
+dependencies {
+    implementation project(':retroceptor-core')
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion"
+}
+
+ext {
+    PUBLISH_ARTIFACT_ID = 'retroceptor-auth'
+    POM_DESCRIPTION = 'Retrofit Interceptor to support automatic authorization handling with built-in support for OAuth2'
+}
+
+apply from: "${rootProject.projectDir}/gradle/mavencentral/publish.gradle"

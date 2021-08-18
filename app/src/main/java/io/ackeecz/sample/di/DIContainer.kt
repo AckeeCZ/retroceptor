@@ -2,9 +2,6 @@ package io.ackeecz.sample.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.github.ackeecz.ackroutine.OAuthManager
-import io.github.ackeecz.ackroutine.OAuthRefreshCallInterceptor
-import io.github.ackeecz.ackroutine.retrofitadapter.AckroutineCallAdapterFactory
 import io.ackeecz.sample.App
 import io.ackeecz.sample.detail.DetailViewModel
 import io.ackeecz.sample.interactor.ApiInteractor
@@ -14,6 +11,9 @@ import io.ackeecz.sample.model.Logouter
 import io.ackeecz.sample.model.rest.ApiDescription
 import io.ackeecz.sample.model.rest.AuthApiDescription
 import io.appflate.restmock.RESTMockServer
+import io.github.ackeecz.retroceptor.OAuthManager
+import io.github.ackeecz.retroceptor.OAuthRefreshCallInterceptor
+import io.github.ackeecz.retroceptor.retrofitadapter.RetroceptorCallAdapterFactory
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -30,7 +30,7 @@ class DIContainer(app: App) : ViewModelProvider.Factory {
         onRefreshTokenFailed = { logouter.logout() }
     )
 
-    val callAdapterFactory: AckroutineCallAdapterFactory = AckroutineCallAdapterFactory(OAuthRefreshCallInterceptor(oAuthManager))
+    val callAdapterFactory: RetroceptorCallAdapterFactory = RetroceptorCallAdapterFactory(OAuthRefreshCallInterceptor(oAuthManager))
 
     val logouter = Logouter(app)
 

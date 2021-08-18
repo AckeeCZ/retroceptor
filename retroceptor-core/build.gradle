@@ -1,0 +1,38 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 30
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode = libProperties['VERSION_CODE']
+        versionName libProperties['VERSION_NAME']
+        // needed for different module name and artifact id name
+        archivesBaseName = "retroceptor-core"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+
+dependencies {
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+}
+
+ext {
+    PUBLISH_ARTIFACT_ID = 'retroceptor-core'
+    POM_DESCRIPTION = 'General purpose Retrofit adapter that allows intercepting calls'
+}
+
+apply from: "${rootProject.projectDir}/gradle/mavencentral/publish.gradle"
+
+// TODO Continue with 6. $rootDir/gradle/bintray/ folder.
