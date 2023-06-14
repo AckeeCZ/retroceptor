@@ -36,8 +36,8 @@ android {
 }
 
 ext {
-    restMockVersion = '0.3.1'
-    stethoVersion = '1.5.1'
+    restMockVersion = '0.4.4'
+    stethoVersion = '1.6.0'
 }
 
 dependencies {

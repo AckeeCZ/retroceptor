@@ -83,26 +83,33 @@ class Server(val context: Context) {
 
         })
 
-        RESTMockServer.whenPOST(RequestMatchers.pathContains("refresh_token")).delay(TimeUnit.MILLISECONDS, 500).thenAnswer(MockAnswer {
+        val refreshAnswer = MockAnswer { recordedRequest ->
             // invalid refresh token
-            if (it.requestUrl.queryParameter("refresh_token") == null || it.requestUrl.queryParameter("refresh_token") != refreshToken) {
-                MockResponse()
-                        .setResponseCode(401)
+            val noRefreshToken = recordedRequest.requestUrl?.queryParameter("refresh_token") == null
+            val invalidToken = recordedRequest.requestUrl?.queryParameter("refresh_token") != refreshToken
+            if (noRefreshToken || invalidToken) {
+                MockResponse().setResponseCode(401)
             } else {
                 accessToken = UUID.randomUUID().toString()
                 refreshToken = UUID.randomUUID().toString()
                 tokenExpiration = System.currentTimeMillis() + EXPIRES_IN * 1000
                 MockResponse()
-                        .setResponseCode(200)
-                        .setBody(loginResponse.format(accessToken, refreshToken, EXPIRES_IN))
+                    .setResponseCode(200)
+                    .setBody(loginResponse.format(accessToken, refreshToken, EXPIRES_IN))
             }
-        })
+        }
+        RESTMockServer.whenPOST(RequestMatchers.pathContains("refresh_token"))
+            .delay(TimeUnit.MILLISECONDS, 500)
+            .thenAnswer(refreshAnswer)
 
-        RESTMockServer.whenPOST(RequestMatchers.pathContains("logout")).delay(TimeUnit.MILLISECONDS, 500).thenAnswer(MockAnswer {
+        val logoutAnswer = MockAnswer {
             accessToken = null
             refreshToken = null
             MockResponse()
-                    .setResponseCode(200)
-        })
+                .setResponseCode(200)
+        }
+        RESTMockServer.whenPOST(RequestMatchers.pathContains("logout"))
+            .delay(TimeUnit.MILLISECONDS, 500)
+            .thenAnswer(logoutAnswer)
     }
 }
